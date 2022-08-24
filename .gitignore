@@ -1,0 +1,6 @@
+/build/*
+/node_modules/
+
+# Keep build directory
+!/build/
+!/build/.gitkeep
