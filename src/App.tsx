@@ -1,15 +1,10 @@
-import React, { useState } from 'react';
+import React from 'react';
+import ItemList from './components/ItemList';
 
 const App = () => {
-  const [counter, setCounter] = useState(0);
-
   return (
-    <div className="container">
-      <div>hello webpack</div>
-      {counter} clicks
-      <button onClick={() => setCounter(counter + 1)}>
-        press
-      </button>
+    <div className="rootContainer">
+      <ItemList />
     </div>
   );
 };
