@@ -2,7 +2,7 @@ import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { RootState } from '../store';
 import { Item } from '../types';
 
-interface ItemsState {
+export interface ItemsState {
   [id: string]: Item
 }
 
@@ -14,6 +14,9 @@ export const itemsSlice = createSlice({
   // automagically wrapped with immer so redux state modification is ok
   // note: do not return AND modify state in same function
   reducers: {
+    initialize: (state, action: PayloadAction<ItemsState>) => {
+      return action.payload;
+    },
     set: (state, action: PayloadAction<Item>) => {
       state[action.payload.id] = action.payload;
     },
