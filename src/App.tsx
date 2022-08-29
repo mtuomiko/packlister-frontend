@@ -1,10 +1,14 @@
 import React from 'react';
-import ItemList from './components/ItemList';
+import { Outlet } from 'react-router-dom';
+import PacklistList from './components/PacklistList';
+import UserItemList from './components/UserItemList';
 
 const App = () => {
   return (
     <div className="rootContainer">
-      <ItemList />
+      <UserItemList />
+      <PacklistList />
+      <Outlet />
     </div>
   );
 };

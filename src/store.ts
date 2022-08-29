@@ -1,5 +1,6 @@
 import { configureStore } from '@reduxjs/toolkit';
-import itemsReducer from './slices/items';
+import itemsReducer from './slices/userItems';
+import packlistsReducer from './slices/packlists';
 import { loadState, saveState } from './localStorage';
 import throttle from 'lodash/throttle';
 
@@ -7,7 +8,8 @@ const savedState = loadState();
 
 const store = configureStore({
   reducer: {
-    items: itemsReducer
+    items: itemsReducer,
+    packlists: packlistsReducer,
   },
   preloadedState: savedState
 });

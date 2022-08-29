@@ -1,23 +1,23 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { RootState } from '../store';
-import { Item } from '../types';
+import { UserItem } from '../types';
 
-export interface ItemsState {
-  [id: string]: Item
+export interface UserItemsState {
+  [id: string]: UserItem
 }
 
-const initialState: ItemsState = {};
+const initialState: UserItemsState = {};
 
-export const itemsSlice = createSlice({
+export const userItemsSlice = createSlice({
   name: 'items',
   initialState,
   // automagically wrapped with immer so redux state modification is ok
   // note: do not return AND modify state in same function
   reducers: {
-    initialize: (state, action: PayloadAction<ItemsState>) => {
-      return action.payload;
-    },
-    set: (state, action: PayloadAction<Item>) => {
+    // initialize: (_state, action: PayloadAction<ItemsState>) => {
+    //   return action.payload;
+    // },
+    set: (state, action: PayloadAction<UserItem>) => {
       state[action.payload.id] = action.payload;
     },
     remove: (state, action: PayloadAction<string>) => {
@@ -28,8 +28,8 @@ export const itemsSlice = createSlice({
   }
 });
 
-export const { set, remove } = itemsSlice.actions;
+export const { set, remove } = userItemsSlice.actions;
 
-export const itemsSelector = (state: RootState) => state.items;
+export const selectUserItems = (state: RootState) => state.items;
 
-export default itemsSlice.reducer;
+export default userItemsSlice.reducer;

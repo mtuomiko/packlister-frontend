@@ -1,15 +1,15 @@
 import React, { ChangeEvent } from 'react';
 import { useAppDispatch, useAppSelector } from '../hooks';
-import { set, remove, itemsSelector } from '../slices/items';
-import { Item } from '../types';
+import { set, remove, selectUserItems } from '../slices/userItems';
+import { UserItem } from '../types';
 import { v4 as uuidv4 } from 'uuid';
 
-const ItemList = () => {
-  const items = useAppSelector(itemsSelector);
+const UserItemList = () => {
+  const items = useAppSelector(selectUserItems);
   const dispatch = useAppDispatch();
 
   const addNew = () => {
-    const newItem: Item = {
+    const newItem: UserItem = {
       id: uuidv4(),
       publicVisibility: false,
     };
@@ -17,7 +17,7 @@ const ItemList = () => {
     dispatch(set(newItem));
   };
 
-  const modifyByValue = (event: ChangeEvent<HTMLInputElement>, item: Item, key: keyof Item) => {
+  const modifyByValue = (event: ChangeEvent<HTMLInputElement>, item: UserItem, key: keyof UserItem) => {
     const value = parseValue(event);
     const modifiedItem = { ...item, [key]: value };
     dispatch(set(modifiedItem));
@@ -31,13 +31,14 @@ const ItemList = () => {
     return event.target.value;
   };
 
-  const modifyByChecked = (event: ChangeEvent<HTMLInputElement>, item: Item, key: keyof Item) => {
+  const modifyByChecked = (event: ChangeEvent<HTMLInputElement>, item: UserItem, key: keyof UserItem) => {
     const modifiedItem = { ...item, [key]: event.target.checked };
     dispatch(set(modifiedItem));
   };
 
   return (
     <div>
+      <h3>Items</h3>
       {Object.entries(items).map(([id, item]) => (
         <div key={id}>
           <input
@@ -68,10 +69,10 @@ const ItemList = () => {
         </div>
       ))}
       <div>
-        <button onClick={() => addNew()}>Add new</button>
+        <button onClick={() => addNew()}>Add new item</button>
       </div>
     </div>
   );
 };
 
-export default ItemList;
+export default UserItemList;

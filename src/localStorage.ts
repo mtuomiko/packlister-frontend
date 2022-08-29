@@ -1,11 +1,16 @@
 import { RootState } from './store';
-import { Item } from './types';
+import { UserItem, Packlist } from './types';
 
-interface ItemsStoreState {
-  [id: string]: Item
-}
+interface StorageState {
+  items: {
+    [id: string]: UserItem
+  }
+  packlists: {
+    [id: string]: Packlist
+  }
+};
 
-export const loadState = (): { items: ItemsStoreState } | undefined => {
+export const loadState = (): StorageState | undefined => {
   try {
     console.log('reading from localStorage');
     const serializedState = window.localStorage.getItem('state');
@@ -14,7 +19,7 @@ export const loadState = (): { items: ItemsStoreState } | undefined => {
     }
     const parsedState = JSON.parse(serializedState);
     console.log(parsedState);
-    return parsedState as { items: ItemsStoreState };
+    return parsedState as StorageState;
   } catch (error) {
     return undefined;
   }
