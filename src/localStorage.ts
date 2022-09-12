@@ -18,9 +18,9 @@ export const loadState = (): StorageState | undefined => {
       return undefined;
     }
     const parsedState = JSON.parse(serializedState);
-    console.log(parsedState);
     return parsedState as StorageState;
   } catch (error) {
+    console.error(error);
     return undefined;
   }
 };
@@ -28,7 +28,6 @@ export const loadState = (): StorageState | undefined => {
 export const saveState = (state: RootState) => {
   try {
     console.log(`writing to localStorage at ${new Date().toLocaleTimeString()}`);
-    console.log(state);
     const serializedState = JSON.stringify(state);
     localStorage.setItem('state', serializedState);
   } catch (error) {
