@@ -1,8 +1,8 @@
 import React, { ChangeEvent } from 'react';
 import { useAppDispatch, useAppSelector } from '../hooks';
-import { selectPacklists, set } from '../slices/packlists';
+import { selectPacklists, set } from '../slices/packlistsSlice';
 import { useParams } from 'react-router-dom';
-import { selectUserItems } from '../slices/userItems';
+import { selectUserItems } from '../slices/userItemsSlice';
 import { Packlist as PacklistType } from '../types';
 
 const Packlist = () => {

@@ -1,12 +1,18 @@
-import { createSlice, PayloadAction } from '@reduxjs/toolkit';
+import { createAsyncThunk, createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { RootState } from '../store';
 import { UserItem } from '../types';
+import userItemsService from '../services/userItems';
 
 export interface UserItemsState {
   [id: string]: UserItem
 }
 
 const initialState: UserItemsState = {};
+
+export const getAll = createAsyncThunk('items/getAll', async () => {
+  const response = await userItemsService.getAll();
+  return response;
+});
 
 export const userItemsSlice = createSlice({
   name: 'items',
@@ -25,6 +31,20 @@ export const userItemsSlice = createSlice({
       // eslint-disable-next-line @typescript-eslint/no-dynamic-delete
       delete state[action.payload];
     },
+  },
+  extraReducers: builder => {
+    builder
+      .addCase(getAll.fulfilled, (state, action) => {
+        const receivedItems = action.payload.userItems.reduce(
+          (memo, item) => ({ ...memo, [item.id]: item }),
+          {}
+        );
+        return { ...state, ...receivedItems };
+      })
+      .addCase(getAll.rejected, (_state, action) => {
+        console.error(action.error);
+        console.error(action.payload);
+      });
   }
 });
 

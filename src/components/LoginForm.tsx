@@ -1,13 +1,14 @@
 import React, { FormEventHandler } from 'react';
 import { useAppDispatch } from '../hooks';
 import { useField } from '../hooks/useField';
-import { login } from '../slices/auth';
+import { login } from '../slices/authSlice';
 
 const LoginForm = () => {
   const dispatch = useAppDispatch();
   const username = useField('text');
   const password = useField('password');
 
+  // dispatching async logic on the handler
   // eslint-disable-next-line @typescript-eslint/no-misused-promises
   const handleLogin: FormEventHandler<HTMLFormElement> = async (event) => {
     event.preventDefault();

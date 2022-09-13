@@ -43,3 +43,7 @@ export interface TokenResponse {
   username: string
   email: string
 };
+
+export interface UserItemResponse {
+  userItems: UserItem[]
+};

@@ -1,19 +1,20 @@
+import { AuthState } from './slices/authSlice';
+import { PacklistsState } from './slices/packlistsSlice';
+import { UserItemsState } from './slices/userItemsSlice';
 import { RootState } from './store';
-import { UserItem, Packlist } from './types';
 
 interface StorageState {
-  items: {
-    [id: string]: UserItem
-  }
-  packlists: {
-    [id: string]: Packlist
-  }
+  items?: UserItemsState
+  packlists?: PacklistsState
+  auth?: AuthState
 };
+
+const ITEM_KEY = 'state';
 
 export const loadState = (): StorageState | undefined => {
   try {
     console.log('reading from localStorage');
-    const serializedState = window.localStorage.getItem('state');
+    const serializedState = window.localStorage.getItem(ITEM_KEY);
     if (serializedState === null) {
       return undefined;
     }
@@ -28,8 +29,12 @@ export const loadState = (): StorageState | undefined => {
 export const saveState = (state: RootState) => {
   try {
     console.log(`writing to localStorage at ${new Date().toLocaleTimeString()}`);
-    const serializedState = JSON.stringify(state);
-    localStorage.setItem('state', serializedState);
+    // when logged in, store only auth to local storage
+    const stateToWrite = state.auth !== null
+      ? { auth: state.auth }
+      : state;
+    const serializedState = JSON.stringify(stateToWrite);
+    localStorage.setItem(ITEM_KEY, serializedState);
   } catch (error) {
     console.error(error);
   }

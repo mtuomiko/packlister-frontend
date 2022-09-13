@@ -1,4 +1,5 @@
 import { createAsyncThunk, createSlice, PayloadAction } from '@reduxjs/toolkit';
+import jwt_decode, { JwtPayload } from 'jwt-decode';
 import { RootState } from '../store';
 import { Credentials, RegistrationInfo, TokenResponse } from '../types';
 import authService from '../services/auth';
@@ -25,32 +26,41 @@ export const authSlice = createSlice({
       return action.payload;
     },
     clear: (_state) => {
-      return undefined;
+      // handled at rootReducer
+    },
+    check: (state) => {
+      if (state === null) { return null; }
+      const decodedToken = jwt_decode<JwtPayload>(state.token);
+      const expiration = decodedToken.exp;
+      if (expiration !== undefined && expiration <= Math.floor(Date.now() / 1000)) {
+        return null;
+      }
+      return state;
     }
   },
   extraReducers: builder => {
     builder
       .addCase(register.fulfilled, (_state, _action) => {
-        return undefined;
+        return null;
       })
       .addCase(register.rejected, (_state, action) => {
         console.error(action.error);
         console.error(action.payload);
-        return undefined;
+        return null;
       })
-      .addCase(login.fulfilled, (state, action) => {
+      .addCase(login.fulfilled, (_state, action) => {
         return action.payload;
       })
       .addCase(login.rejected, (_state, action) => {
         console.error(action.error);
         console.error(action.payload);
-        return undefined;
+        return null;
       });
   }
 });
 
-export const { set, clear } = authSlice.actions;
+export const { set, clear, check } = authSlice.actions;
 
-export const getUser = (state: RootState) => state.auth;
+export const getAuth = (state: RootState) => state.auth;
 
 export default authSlice.reducer;

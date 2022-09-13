@@ -1,6 +1,6 @@
 import React from 'react';
 import { useAppDispatch, useAppSelector } from '../hooks';
-import { set, remove, selectPacklists } from '../slices/packlists';
+import { set, remove, selectPacklists } from '../slices/packlistsSlice';
 import { Packlist } from '../types';
 import { v4 as uuidv4 } from 'uuid';
 import { Link } from 'react-router-dom';

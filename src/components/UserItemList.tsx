@@ -1,6 +1,6 @@
 import React, { ChangeEvent } from 'react';
 import { useAppDispatch, useAppSelector } from '../hooks';
-import { set, remove, selectUserItems } from '../slices/userItems';
+import { set, remove, selectUserItems } from '../slices/userItemsSlice';
 import { UserItem } from '../types';
 import { v4 as uuidv4 } from 'uuid';
 

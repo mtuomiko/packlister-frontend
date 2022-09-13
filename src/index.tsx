@@ -4,7 +4,10 @@ import { Provider } from 'react-redux';
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
 import App from './App';
 import Packlist from './components/Packlist';
+import { injectStore } from './services/axiosConfig';
 import { store } from './store';
+
+injectStore(store);
 
 const root = ReactDOM.createRoot(document.getElementById('root') as HTMLElement);
 root.render(

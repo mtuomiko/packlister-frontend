@@ -1,4 +1,4 @@
-import axios from 'axios';
+import axios from './axiosConfig';
 import { Credentials, RegistrationInfo, TokenResponse, UserResponse } from '../types';
 
 const baseUrl = 'http://localhost:8080/api/auth';
