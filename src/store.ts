@@ -17,7 +17,13 @@ export type RootState = ReturnType<typeof appReducer>;
 
 const rootReducer = (state: RootState, action: AnyAction) => {
   if (action.type === 'auth/clear') {
-    state = { items: {}, packlists: {}, auth: null };
+    state = {
+      items: {
+        userItems: {}, dirtyIds: [], deletedIds: []
+      },
+      packlists: {},
+      auth: null
+    };
   }
   return appReducer(state, action);
 };
