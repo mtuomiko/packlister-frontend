@@ -1,20 +1,21 @@
 import React, { useEffect } from 'react';
 import { Outlet } from 'react-router-dom';
 import LoginForm from './components/LoginForm';
-import PacklistList from './components/PacklistList';
 import Profile from './components/Profile';
-import UserItemList from './components/UserItemList';
 import { useAppDispatch, useAppSelector } from './hooks';
 import { selectAuth } from './slices/authSlice';
-import { batchUpsert, getAll, selectDirtyIds, selectUserItems } from './slices/userItemsSlice';
+import { batchDelete, batchUpsert, getAll, selectDeletedIds, selectDirtyIds, selectUserItems } from './slices/userItemsSlice';
 import pickBy from 'lodash/pickBy';
+import DragDisplay from './components/DragDisplay';
 
 const App = () => {
   const dispatch = useAppDispatch();
   const auth = useAppSelector(selectAuth);
   const userItems = useAppSelector(selectUserItems);
   const dirtyIds = useAppSelector(selectDirtyIds);
+  const deletedIds = useAppSelector(selectDeletedIds);
 
+  // get initial data if logged in
   useEffect(() => {
     const getData = async () => {
       if (auth === null) { return; }
@@ -25,22 +26,24 @@ const App = () => {
   }, [auth]);
 
   useEffect(() => {
-    const periodicUpsert = async () => {
-      console.log('running periodic upsert');
-      if (dirtyIds.length === 0) { return; }
-      console.log(dirtyIds);
-      const itemsToUpsert = Object.values(
-        pickBy(userItems, (_value, key) => dirtyIds.includes(key))
-      );
-      await dispatch(batchUpsert(itemsToUpsert));
+    if (auth === null) { return; }
+    // wait 10sec after change and then update
+    const timeoutUpdate = () => {
+      if (dirtyIds.length !== 0) {
+        const itemsToUpsert = Object.values(
+          pickBy(userItems, (_value, key) => dirtyIds.includes(key))
+        );
+        void dispatch(batchUpsert(itemsToUpsert)); // just run, don't care about async result here
+      }
+      if (deletedIds.length !== 0) {
+        void dispatch(batchDelete(deletedIds));
+      }
     };
 
-    // eslint-disable-next-line @typescript-eslint/no-misused-promises
-    const intervalId = window.setTimeout(periodicUpsert, 10000);
+    const id = window.setTimeout(timeoutUpdate, 10000);
 
-    // void periodicUpsert();
-    return () => window.clearTimeout(intervalId);
-  }, [dirtyIds]);
+    return () => window.clearTimeout(id);
+  }, [auth, userItems, dirtyIds, deletedIds]);
 
   return (
     <div className="rootContainer">
@@ -48,8 +51,7 @@ const App = () => {
         ? <Profile auth={auth} />
         : <LoginForm />
       }
-      <UserItemList />
-      <PacklistList />
+      <DragDisplay />
       <Outlet />
     </div>
   );

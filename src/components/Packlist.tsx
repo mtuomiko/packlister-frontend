@@ -1,22 +1,19 @@
 import React, { ChangeEvent } from 'react';
 import { useAppDispatch, useAppSelector } from '../hooks';
-import { selectPacklists, set } from '../slices/packlistsSlice';
+import { set, addCategory, CategoryWithPacklist, setCategory, selectPacklistById } from '../slices/packlistsSlice';
 import { useParams } from 'react-router-dom';
-import { selectUserItems } from '../slices/userItemsSlice';
-import { Packlist as PacklistType } from '../types';
+import { Category as CategoryType, Packlist as PacklistType } from '../types';
+import { v4 as uuidv4 } from 'uuid';
+import Category from './Category';
 
 const Packlist = () => {
   const params = useParams();
-  const packlistId = params.packlistId;
-  const packlists = useAppSelector(selectPacklists);
-  const userItems = useAppSelector(selectUserItems);
   const dispatch = useAppDispatch();
-
-  if (packlistId === undefined) {
-    return (<div>no packlist</div>);
-  }
-
-  const packlist = packlists[params.packlistId as string];
+  const packlistId = params.packlistId;
+  const packlist = useAppSelector(state => {
+    if (packlistId !== undefined) { return selectPacklistById(state, packlistId); }
+    return undefined;
+  });
 
   if (packlist === undefined) {
     return (<div>no packlist</div>);
@@ -27,43 +24,52 @@ const Packlist = () => {
     dispatch(set(modifiedItem));
   };
 
+  const addNewCategory = () => {
+    const newCategory: CategoryWithPacklist = {
+      packlistId: packlist.id,
+      category: {
+        id: uuidv4(),
+        items: []
+      }
+    };
+
+    dispatch(addCategory(newCategory));
+  };
+
+  const modifyCategory = (category: CategoryType) => {
+    const payload: CategoryWithPacklist = {
+      packlistId: packlist.id,
+      category
+    };
+    dispatch(setCategory(payload));
+  };
+
   return (
     <div>
-      <input
-        name="name"
-        type="text"
-        value={packlist.name ?? ''}
-        onChange={(e) => modifyByValue(e, 'name')}
-      />
-      <input
-        name="description"
-        type="text"
-        value={packlist.description ?? ''}
-        onChange={(e) => modifyByValue(e, 'description')}
-      />
-      {Object.entries(packlist.categories).map(([id, category]) => (
-        <div key={id}>
-          <input
-            name="name"
-            type="text"
-            value={category.name ?? ''}
-          />
-          {category.items.map(categoryItem => (
-            <div key={categoryItem.id}>
-              <input
-                name="name"
-                type="text"
-                value={userItems[categoryItem.id].name ?? ''}
-              />
-              <input
-                name="description"
-                type="text"
-                value={userItems[categoryItem.id].description ?? ''}
-              />
-            </div>
-          ))}
-        </div>
-      ))}
+      <div>
+        <label>Name</label>
+        <input
+          name="name"
+          type="text"
+          value={packlist.name ?? ''}
+          onChange={(e) => modifyByValue(e, 'name')}
+        />
+      </div>
+      <div>
+        <label>Description</label>
+        <input
+          name="description"
+          type="text"
+          value={packlist.description ?? ''}
+          onChange={(e) => modifyByValue(e, 'description')}
+        />
+      </div>
+      {Object.entries(packlist.categories).map(([id, category]) =>
+        <Category key={id} category={category} modifyCategory={modifyCategory} />
+      )}
+      <div>
+        <button onClick={addNewCategory}>Add new category</button>
+      </div>
     </div>
   );
 };

@@ -79,6 +79,7 @@ export const userItemsSlice = createSlice({
 export const { set, remove } = userItemsSlice.actions;
 
 export const selectUserItems = (state: RootState) => state.items.userItems;
+export const selectUserItemById = (state: RootState, id: string) => state.items.userItems[id];
 export const selectDirtyIds = (state: RootState) => state.items.dirtyIds;
 export const selectDeletedIds = (state: RootState) => state.items.deletedIds;
 

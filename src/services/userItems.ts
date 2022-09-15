@@ -16,7 +16,7 @@ const batchUpsert = async (userItems: UserItem[]) => {
 
 const batchDelete = async (userItemIds: string[]) => {
   const body = { userItemIds };
-  await axios.post(`${baseUrl}/batch`, body);
+  await axios.post(`${baseUrl}/batchDelete`, body);
 };
 
 export default { getAll, batchUpsert, batchDelete };
