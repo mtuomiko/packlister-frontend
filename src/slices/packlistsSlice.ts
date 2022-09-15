@@ -1,14 +1,14 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { RootState } from '../store';
-import { Category, Packlist } from '../types';
+import { Packlist, UUID } from '../types';
 
 export interface PacklistsState {
-  [id: string]: Packlist
+  [id: UUID]: Packlist
 }
 
-export interface CategoryWithPacklist {
-  packlistId: string
-  category: Category
+export interface CategoryIdWithPacklistId {
+  packlistId: UUID
+  categoryId: UUID
 }
 
 const initialState: PacklistsState = {};
@@ -19,29 +19,28 @@ export const packlistsSlice = createSlice({
   // automagically wrapped with immer so redux state modification is ok
   // note: do not return AND modify state in same function
   reducers: {
-    set: (state, action: PayloadAction<Packlist>) => {
+    setPacklist: (state, action: PayloadAction<Packlist>) => {
       state[action.payload.id] = action.payload;
     },
-    remove: (state, action: PayloadAction<string>) => {
+    removePacklist: (state, action: PayloadAction<UUID>) => {
       // should be fine, not using Map() instead of object due to possible issues with Redux
       // eslint-disable-next-line @typescript-eslint/no-dynamic-delete
       delete state[action.payload];
     },
-    addCategory: (state, action: PayloadAction<CategoryWithPacklist>) => {
-      state[action.payload.packlistId].categories.push(action.payload.category);
+    addCategoryToPacklist: (state, action: PayloadAction<CategoryIdWithPacklistId>) => {
+      state[action.payload.packlistId].categoryIds.push(action.payload.categoryId);
     },
-    setCategory: (state, action: PayloadAction<CategoryWithPacklist>) => {
-      const index = state[action.payload.packlistId].categories
-        .findIndex((category) => category.id === action.payload.category.id);
-      state[action.payload.packlistId].categories[index] = action.payload.category;
+    removeCategoryFromPacklist: (state, action: PayloadAction<CategoryIdWithPacklistId>) => {
+      const index = state[action.payload.packlistId].categoryIds.indexOf(action.payload.categoryId);
+      state[action.payload.packlistId].categoryIds.splice(index, 1);
     },
   }
 });
 
-export const { set, remove, addCategory, setCategory } = packlistsSlice.actions;
+export const { setPacklist, removePacklist, addCategoryToPacklist, removeCategoryFromPacklist } = packlistsSlice.actions;
 
 export const selectPacklists = (state: RootState) => state.packlists;
 
-export const selectPacklistById = (state: RootState, id: string) => state.packlists[id];
+export const selectPacklistById = (state: RootState, id: UUID) => state.packlists[id];
 
 export default packlistsSlice.reducer;

@@ -1,5 +1,7 @@
+export type UUID = string;
+
 export interface UserItem {
-  id: string
+  id: UUID
   name?: string
   description?: string
   weight?: number
@@ -7,20 +9,20 @@ export interface UserItem {
 };
 
 export interface Packlist {
-  id: string
+  id: UUID
   name?: string
   description?: string
-  categories: Category[]
+  categoryIds: string[]
 };
 
 export interface Category {
-  id: string
+  id: UUID
   name?: string
   items: CategoryItem[]
 };
 
 export interface CategoryItem {
-  id: string
+  userItemId: UUID
   quantity: number
 };
 

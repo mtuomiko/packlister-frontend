@@ -1,28 +1,32 @@
 import React, { ChangeEvent } from 'react';
 import { useDrop } from 'react-dnd';
 import { ItemTypes } from '../constants';
-import { Category as CategoryType, CategoryItem as CategoryItemType } from '../types';
+import { useAppDispatch, useAppSelector } from '../hooks';
+import { selectCategoryById, setCategory } from '../slices/categorySlice';
+import { v4 as uuidv4 } from 'uuid';
+import { CategoryItem as CategoryItemType, UserItem, UUID } from '../types';
 import CategoryItem from './CategoryItem';
+import { setUserItem } from '../slices/userItemsSlice';
 
 interface DragUserItem {
   type: string
-  id: string
+  id: UUID
 }
 
-const Category = ({ category, modifyCategory }: {
-  category: CategoryType
-  modifyCategory: (category: CategoryType) => void
-}) => {
+const Category = ({ categoryId }: { categoryId: UUID }) => {
+  const dispatch = useAppDispatch();
+  const category = useAppSelector(state => selectCategoryById(state, categoryId));
+
   const [{ isOver }, drop] = useDrop(() => ({
     accept: ItemTypes.USER_ITEM,
     drop: (item: DragUserItem) => {
       const newCategoryItem: CategoryItemType = {
-        id: item.id,
+        userItemId: item.id,
         quantity: 1
       };
       const newItems = [...category.items, newCategoryItem];
       const modifiedCategory = { ...category, items: newItems };
-      modifyCategory(modifiedCategory);
+      dispatch(setCategory(modifiedCategory));
     },
     collect: monitor => ({
       isOver: !!monitor.isOver()
@@ -31,11 +35,26 @@ const Category = ({ category, modifyCategory }: {
 
   const modifyByValue = (event: ChangeEvent<HTMLInputElement>) => {
     const modifiedCategory = { ...category, name: event.target.value };
-    modifyCategory(modifiedCategory);
+    dispatch(setCategory(modifiedCategory));
+  };
+
+  const addNewItem = () => {
+    const newItem: UserItem = {
+      id: uuidv4(),
+      publicVisibility: false,
+    };
+    const newCategoryItem: CategoryItemType = {
+      userItemId: newItem.id,
+      quantity: 1
+    };
+    const newItems = [...category.items, newCategoryItem];
+    const modifiedCategory = { ...category, items: newItems };
+    dispatch(setUserItem(newItem));
+    dispatch(setCategory(modifiedCategory));
   };
 
   return (
-    <div ref={drop}>
+    <div ref={drop} style={{ position: 'relative' }}>
       <input
         name="name"
         type="text"
@@ -44,13 +63,18 @@ const Category = ({ category, modifyCategory }: {
         onChange={modifyByValue}
       />
       {category.items.map(categoryItem => (
-        <CategoryItem key={categoryItem.id} categoryItem={categoryItem} />
+        <CategoryItem key={categoryItem.userItemId} categoryItem={categoryItem} />
       ))}
+      <div>
+        <button onClick={addNewItem}>Add new item</button>
+      </div>
       {category.items.length === 0 && <div>Drag here</div>}
       {isOver && (
         <div
           style={{
             position: 'absolute',
+            top: 0,
+            left: 0,
             height: '100%',
             width: '100%',
             zIndex: 1,

@@ -1,12 +1,14 @@
 import React, { ChangeEvent } from 'react';
 import { useDrag } from 'react-dnd';
 import { ItemTypes } from '../constants';
-import { useAppDispatch } from '../hooks';
-import { remove, set } from '../slices/userItemsSlice';
-import { UserItem as UserItemType } from '../types';
+import { useAppDispatch, useAppSelector } from '../hooks';
+import { removeUserItem, selectUserItemById, setUserItem } from '../slices/userItemsSlice';
+import { UserItem as UserItemType, UUID } from '../types';
 import { parseValue } from '../utils/inputUtils';
 
-const UserItem = ({ userItem }: { userItem: UserItemType }) => {
+const UserItem = ({ userItemId }: { userItemId: UUID }) => {
+  const userItem = useAppSelector(state => selectUserItemById(state, userItemId));
+
   const dispatch = useAppDispatch();
   const [{ isDragging }, drag] = useDrag(() => ({
     type: ItemTypes.USER_ITEM,
@@ -19,12 +21,12 @@ const UserItem = ({ userItem }: { userItem: UserItemType }) => {
   const modifyByValue = (event: ChangeEvent<HTMLInputElement>, item: UserItemType, key: keyof UserItemType) => {
     const value = parseValue(event);
     const modifiedItem = { ...item, [key]: value };
-    dispatch(set(modifiedItem));
+    dispatch(setUserItem(modifiedItem));
   };
 
   const modifyByChecked = (event: ChangeEvent<HTMLInputElement>, item: UserItemType, key: keyof UserItemType) => {
     const modifiedItem = { ...item, [key]: event.target.checked };
-    dispatch(set(modifiedItem));
+    dispatch(setUserItem(modifiedItem));
   };
 
   const { id, name, description, weight, publicVisibility } = userItem;
@@ -54,7 +56,7 @@ const UserItem = ({ userItem }: { userItem: UserItemType }) => {
         checked={publicVisibility}
         onChange={(e) => modifyByChecked(e, userItem, 'publicVisibility')}
       />
-      <button onClick={() => dispatch(remove(id))}>X</button>
+      <button onClick={() => dispatch(removeUserItem(id))}>X</button>
     </div>
   );
 };

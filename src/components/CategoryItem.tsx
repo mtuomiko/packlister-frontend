@@ -4,10 +4,10 @@ import { selectUserItemById } from '../slices/userItemsSlice';
 import { CategoryItem as CategoryItemType } from '../types';
 
 const CategoryItem = ({ categoryItem }: { categoryItem: CategoryItemType }) => {
-  const userItem = useAppSelector(state => selectUserItemById(state, categoryItem.id));
+  const userItem = useAppSelector(state => selectUserItemById(state, categoryItem.userItemId));
 
   return (
-    <div key={categoryItem.id}>
+    <div key={categoryItem.userItemId}>
       <input
         name="name"
         type="text"

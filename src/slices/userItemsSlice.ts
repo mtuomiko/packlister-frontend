@@ -1,27 +1,53 @@
 import { createAsyncThunk, createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { RootState } from '../store';
-import { UserItem } from '../types';
+import { UserItem, UserItemResponse, UUID } from '../types';
 import userItemsService from '../services/userItems';
+import pickBy from 'lodash/pickBy';
 
 export interface UserItemsState {
-  userItems: { [id: string]: UserItem }
-  dirtyIds: string[]
-  deletedIds: string[]
+  userItems: {
+    byId: { [id: UUID]: UserItem }
+    allIds: UUID[]
+  }
+  dirtyIds: UUID[]
+  deletedIds: UUID[]
 }
 
-const initialState: UserItemsState = { userItems: {}, dirtyIds: [], deletedIds: [] };
+const initialState: UserItemsState = {
+  userItems: {
+    byId: {},
+    allIds: []
+  },
+  dirtyIds: [],
+  deletedIds: []
+};
 
 export const getAll = createAsyncThunk('items/getAll', async () => {
   const response = await userItemsService.getAll();
   return response;
 });
 
-export const batchUpsert = createAsyncThunk('items/batchUpsert', async (userItems: UserItem[]) => {
-  const response = await userItemsService.batchUpsert(userItems);
+/**
+ * Gets a list of dirty user item ids that need to be upserted to backend. Not expecting the actual user items due to
+ * causing a dependency to the user items (instead of just the dirty user item ids) in the source point. Accesses global
+ * state to then get the actual user item data.
+ */
+export const batchUpsert = createAsyncThunk<
+  UserItemResponse,
+  UUID[],
+  {
+    state: RootState
+  }
+>('items/batchUpsert', async (userItemIds: UUID[], { getState }) => {
+  const userItems = selectUserItems(getState());
+  const itemsToUpsert = Object.values(
+    pickBy(userItems, (_value, key) => userItemIds.includes(key))
+  );
+  const response = await userItemsService.batchUpsert(itemsToUpsert);
   return response;
 });
 
-export const batchDelete = createAsyncThunk('items/batchDelete', async (userItemIds: string[]) => {
+export const batchDelete = createAsyncThunk('items/batchDelete', async (userItemIds: UUID[]) => {
   await userItemsService.batchDelete(userItemIds);
   return userItemIds;
 });
@@ -32,16 +58,20 @@ export const userItemsSlice = createSlice({
   // automagically wrapped with immer so redux state modification is ok
   // note: do not return AND modify state in same function
   reducers: {
-    set: (state, action: PayloadAction<UserItem>) => {
-      state.userItems[action.payload.id] = action.payload;
-      if (!state.dirtyIds.includes(action.payload.id)) {
-        state.dirtyIds.push(action.payload.id);
+    setUserItem: (state, action: PayloadAction<UserItem>) => {
+      const id = action.payload.id;
+      state.userItems.byId[id] = action.payload;
+      if (!state.userItems.allIds.includes(id)) { state.userItems.allIds.push(id); }
+      if (!state.dirtyIds.includes(id)) {
+        state.dirtyIds.push(id);
       }
     },
-    remove: (state, action: PayloadAction<string>) => {
+    removeUserItem: (state, action: PayloadAction<UUID>) => {
       // should be fine, not using Map() instead of object due to possible issues with Redux
       // eslint-disable-next-line @typescript-eslint/no-dynamic-delete
-      delete state.userItems[action.payload];
+      delete state.userItems.byId[action.payload];
+      const index = state.userItems.allIds.indexOf(action.payload);
+      state.userItems.allIds.splice(index, 1);
       if (!state.deletedIds.includes(action.payload)) {
         state.deletedIds.push(action.payload);
       }
@@ -54,9 +84,11 @@ export const userItemsSlice = createSlice({
           (memo, item) => ({ ...memo, [item.id]: item }),
           {}
         );
-        // possible items coming from "offline" use should be retained
-        const allItems = { ...state.userItems, ...receivedItems };
-        state.userItems = allItems;
+        const receivedItemIds = Object.keys(receivedItems);
+        // possible items coming from "offline use" use should be retained
+        const allItems = { ...state.userItems.byId, ...receivedItems };
+        state.userItems.byId = allItems;
+        state.userItems.allIds = [...state.userItems.allIds, ...receivedItemIds];
       })
       .addCase(getAll.rejected, (_state, action) => {
         console.error(action.error);
@@ -67,6 +99,7 @@ export const userItemsSlice = createSlice({
         // if state has new items that weren't upserted, keep them in dirty
         const remaining = state.dirtyIds.filter(id => !upsertedIds.includes(id));
         state.dirtyIds = remaining;
+        // don't do anything with the actual returned items, currently expecting that nothing changes
       })
       .addCase(batchDelete.fulfilled, (state, action) => {
         const deletedIds = action.payload;
@@ -76,10 +109,11 @@ export const userItemsSlice = createSlice({
   }
 });
 
-export const { set, remove } = userItemsSlice.actions;
+export const { setUserItem, removeUserItem } = userItemsSlice.actions;
 
-export const selectUserItems = (state: RootState) => state.items.userItems;
-export const selectUserItemById = (state: RootState, id: string) => state.items.userItems[id];
+export const selectUserItems = (state: RootState) => state.items.userItems.byId;
+export const selectUserItemIds = (state: RootState) => state.items.userItems.allIds;
+export const selectUserItemById = (state: RootState, id: UUID) => selectUserItems(state)[id];
 export const selectDirtyIds = (state: RootState) => state.items.dirtyIds;
 export const selectDeletedIds = (state: RootState) => state.items.deletedIds;
 

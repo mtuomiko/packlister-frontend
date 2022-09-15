@@ -1,12 +1,12 @@
-import React, { ChangeEvent } from 'react';
+import React from 'react';
 import { useAppDispatch, useAppSelector } from '../hooks';
-import { set, remove, selectUserItems } from '../slices/userItemsSlice';
+import { setUserItem, selectUserItemIds } from '../slices/userItemsSlice';
 import { UserItem as UserItemType } from '../types';
 import { v4 as uuidv4 } from 'uuid';
 import UserItem from './UserItem';
 
 const UserItemList = () => {
-  const items = useAppSelector(selectUserItems);
+  const itemIds = useAppSelector(selectUserItemIds);
   const dispatch = useAppDispatch();
 
   const addNew = () => {
@@ -15,14 +15,14 @@ const UserItemList = () => {
       publicVisibility: false,
     };
 
-    dispatch(set(newItem));
+    dispatch(setUserItem(newItem));
   };
 
   return (
     <div>
       <h3>Items</h3>
-      {Object.entries(items).map(([id, item]) =>
-        <UserItem key={id} userItem={item} />
+      {itemIds.map(id =>
+        <UserItem key={id} userItemId={id} />
       )}
       <div>
         <button onClick={() => addNew()}>Add new item</button>

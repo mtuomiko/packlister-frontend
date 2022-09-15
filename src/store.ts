@@ -1,16 +1,18 @@
 import { AnyAction, combineReducers, configureStore } from '@reduxjs/toolkit';
+import authReducer from './slices/authSlice';
 import itemsReducer from './slices/userItemsSlice';
 import packlistsReducer from './slices/packlistsSlice';
-import authReducer from './slices/authSlice';
+import categoryReducer from './slices/categorySlice';
 import { loadState, saveState } from './localStorage';
 import throttle from 'lodash/throttle';
 
 const savedState = loadState();
 
 const appReducer = combineReducers({
+  auth: authReducer,
   items: itemsReducer,
   packlists: packlistsReducer,
-  auth: authReducer
+  categories: categoryReducer,
 });
 
 export type RootState = ReturnType<typeof appReducer>;
@@ -18,11 +20,17 @@ export type RootState = ReturnType<typeof appReducer>;
 const rootReducer = (state: RootState, action: AnyAction) => {
   if (action.type === 'auth/clear') {
     state = {
+      auth: null,
       items: {
-        userItems: {}, dirtyIds: [], deletedIds: []
+        userItems: {
+          byId: {},
+          allIds: [],
+        },
+        dirtyIds: [],
+        deletedIds: []
       },
       packlists: {},
-      auth: null
+      categories: {},
     };
   }
   return appReducer(state, action);

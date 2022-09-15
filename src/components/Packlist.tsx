@@ -1,10 +1,11 @@
 import React, { ChangeEvent } from 'react';
 import { useAppDispatch, useAppSelector } from '../hooks';
-import { set, addCategory, CategoryWithPacklist, setCategory, selectPacklistById } from '../slices/packlistsSlice';
+import { setPacklist, addCategoryToPacklist, selectPacklistById } from '../slices/packlistsSlice';
 import { useParams } from 'react-router-dom';
 import { Category as CategoryType, Packlist as PacklistType } from '../types';
 import { v4 as uuidv4 } from 'uuid';
 import Category from './Category';
+import { setCategory } from '../slices/categorySlice';
 
 const Packlist = () => {
   const params = useParams();
@@ -21,27 +22,16 @@ const Packlist = () => {
 
   const modifyByValue = (event: ChangeEvent<HTMLInputElement>, key: keyof PacklistType) => {
     const modifiedItem = { ...packlist, [key]: event.target.value };
-    dispatch(set(modifiedItem));
+    dispatch(setPacklist(modifiedItem));
   };
 
   const addNewCategory = () => {
-    const newCategory: CategoryWithPacklist = {
-      packlistId: packlist.id,
-      category: {
-        id: uuidv4(),
-        items: []
-      }
+    const newCategory: CategoryType = {
+      id: uuidv4(),
+      items: []
     };
-
-    dispatch(addCategory(newCategory));
-  };
-
-  const modifyCategory = (category: CategoryType) => {
-    const payload: CategoryWithPacklist = {
-      packlistId: packlist.id,
-      category
-    };
-    dispatch(setCategory(payload));
+    dispatch(setCategory(newCategory));
+    dispatch(addCategoryToPacklist({ packlistId: packlist.id, categoryId: newCategory.id }));
   };
 
   return (
@@ -64,8 +54,8 @@ const Packlist = () => {
           onChange={(e) => modifyByValue(e, 'description')}
         />
       </div>
-      {Object.entries(packlist.categories).map(([id, category]) =>
-        <Category key={id} category={category} modifyCategory={modifyCategory} />
+      {packlist.categoryIds.map(categoryId =>
+        <Category key={categoryId} categoryId={categoryId} />
       )}
       <div>
         <button onClick={addNewCategory}>Add new category</button>
