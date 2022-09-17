@@ -9,8 +9,8 @@ import UserItemList from './UserItemList';
 const DragDisplay = () => {
   return (
     <DndProvider backend={HTML5Backend}>
-      <UserItemList />
       <PacklistList />
+      <UserItemList />
       <Routes>
         <Route path="packlists/:packlistId" element={<Packlist />} />
       </Routes>

@@ -1,7 +1,7 @@
 import { AnyAction, combineReducers, configureStore } from '@reduxjs/toolkit';
 import authReducer from './slices/authSlice';
-import itemsReducer from './slices/userItemsSlice';
-import packlistsReducer from './slices/packlistsSlice';
+import itemReducer from './slices/userItemSlice';
+import packlistReducer from './slices/packlistSlice';
 import categoryReducer from './slices/categorySlice';
 import { loadState, saveState } from './localStorage';
 import throttle from 'lodash/throttle';
@@ -10,8 +10,8 @@ const savedState = loadState();
 
 const appReducer = combineReducers({
   auth: authReducer,
-  items: itemsReducer,
-  packlists: packlistsReducer,
+  items: itemReducer,
+  packlists: packlistReducer,
   categories: categoryReducer,
 });
 

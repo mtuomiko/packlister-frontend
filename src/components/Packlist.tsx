@@ -1,28 +1,46 @@
-import React, { ChangeEvent } from 'react';
+import React, { ChangeEvent, useEffect } from 'react';
 import { useAppDispatch, useAppSelector } from '../hooks';
-import { setPacklist, addCategoryToPacklist, selectPacklistById } from '../slices/packlistsSlice';
+import { setPacklist, addCategoryToPacklist, selectPacklistById, getPacklistComplete } from '../slices/packlistSlice';
 import { useParams } from 'react-router-dom';
 import { Category as CategoryType, Packlist as PacklistType } from '../types';
 import { v4 as uuidv4 } from 'uuid';
 import Category from './Category';
 import { setCategory } from '../slices/categorySlice';
+import { selectAuth } from '../slices/authSlice';
 
 const Packlist = () => {
   const params = useParams();
   const dispatch = useAppDispatch();
-  const packlistId = params.packlistId;
-  const packlist = useAppSelector(state => {
-    if (packlistId !== undefined) { return selectPacklistById(state, packlistId); }
-    return undefined;
-  });
 
-  if (packlist === undefined) {
-    return (<div>no packlist</div>);
+  const packlistId = params.packlistId;
+  if (packlistId === undefined) {
+    return null;
   }
 
-  const modifyByValue = (event: ChangeEvent<HTMLInputElement>, key: keyof PacklistType) => {
-    const modifiedItem = { ...packlist, [key]: event.target.value };
-    dispatch(setPacklist(modifiedItem));
+  const auth = useAppSelector(selectAuth);
+  const packlist = useAppSelector(state => {
+    return selectPacklistById(state, packlistId) as PacklistType | undefined; // state cannot guarantee existence
+  });
+
+  useEffect(() => {
+    const getPacklist = async () => {
+      if (auth === null) { return; }
+      await dispatch(getPacklistComplete(packlistId));
+    };
+
+    if (packlist === undefined || packlist.type === 'limited') {
+      void getPacklist();
+    }
+  }, [auth, packlist]);
+
+  // only operate on complete packlists
+  if (packlist === undefined || packlist.type === 'limited') {
+    return null;
+  }
+
+  const modifyByValue = (event: ChangeEvent<HTMLInputElement>) => {
+    const modifiedPacklist = { ...packlist, [event.target.name]: event.target.value };
+    dispatch(setPacklist(modifiedPacklist));
   };
 
   const addNewCategory = () => {
@@ -42,7 +60,7 @@ const Packlist = () => {
           name="name"
           type="text"
           value={packlist.name ?? ''}
-          onChange={(e) => modifyByValue(e, 'name')}
+          onChange={(e) => modifyByValue(e)}
         />
       </div>
       <div>
@@ -51,7 +69,7 @@ const Packlist = () => {
           name="description"
           type="text"
           value={packlist.description ?? ''}
-          onChange={(e) => modifyByValue(e, 'description')}
+          onChange={(e) => modifyByValue(e)}
         />
       </div>
       {packlist.categoryIds.map(categoryId =>

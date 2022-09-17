@@ -6,7 +6,7 @@ import { selectCategoryById, setCategory } from '../slices/categorySlice';
 import { v4 as uuidv4 } from 'uuid';
 import { CategoryItem as CategoryItemType, UserItem, UUID } from '../types';
 import CategoryItem from './CategoryItem';
-import { setUserItem } from '../slices/userItemsSlice';
+import { setUserItem } from '../slices/userItemSlice';
 
 interface DragUserItem {
   type: string
@@ -20,6 +20,9 @@ const Category = ({ categoryId }: { categoryId: UUID }) => {
   const [{ isOver }, drop] = useDrop(() => ({
     accept: ItemTypes.USER_ITEM,
     drop: (item: DragUserItem) => {
+      const existingItemIndex = category.items.findIndex(categoryItem => categoryItem.userItemId === item.id);
+      if (existingItemIndex !== -1) { return; }
+
       const newCategoryItem: CategoryItemType = {
         userItemId: item.id,
         quantity: 1

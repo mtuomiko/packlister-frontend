@@ -1,21 +1,38 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useAppDispatch, useAppSelector } from '../hooks';
-import { setPacklist, removePacklist, selectPacklists } from '../slices/packlistsSlice';
-import { Packlist } from '../types';
+import { setPacklist, removePacklist, selectPacklists, upsertPacklist, getAllPacklists } from '../slices/packlistSlice';
+import { PacklistComplete } from '../types';
 import { v4 as uuidv4 } from 'uuid';
 import { Link } from 'react-router-dom';
+import { selectAuth } from '../slices/authSlice';
 
 const PacklistList = () => {
+  const auth = useAppSelector(selectAuth);
   const packlists = useAppSelector(selectPacklists);
   const dispatch = useAppDispatch();
 
+  // get initial data if logged in
+  useEffect(() => {
+    const getData = async () => {
+      if (auth === null) { return; }
+      await dispatch(getAllPacklists());
+    };
+
+    void getData();
+  }, [auth]);
+
   const addNew = () => {
-    const newPacklist: Packlist = {
+    const newPacklist: PacklistComplete = {
+      type: 'complete',
       id: uuidv4(),
       categoryIds: [],
     };
 
-    dispatch(setPacklist(newPacklist));
+    if (auth !== null) {
+      void dispatch(upsertPacklist(newPacklist));
+    } else {
+      dispatch(setPacklist(newPacklist));
+    }
   };
 
   return (

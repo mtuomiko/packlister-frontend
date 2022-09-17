@@ -2,30 +2,25 @@ import React, { ChangeEvent } from 'react';
 import { useDrag } from 'react-dnd';
 import { ItemTypes } from '../constants';
 import { useAppDispatch, useAppSelector } from '../hooks';
-import { removeUserItem, selectUserItemById, setUserItem } from '../slices/userItemsSlice';
+import { removeUserItem, selectUserItemById, setUserItem } from '../slices/userItemSlice';
 import { UserItem as UserItemType, UUID } from '../types';
-import { parseValue } from '../utils/inputUtils';
+import { parseEventToValue } from '../utils/inputUtils';
 
 const UserItem = ({ userItemId }: { userItemId: UUID }) => {
   const userItem = useAppSelector(state => selectUserItemById(state, userItemId));
-
   const dispatch = useAppDispatch();
+
   const [{ isDragging }, drag] = useDrag(() => ({
     type: ItemTypes.USER_ITEM,
-    item: { id: userItem.id },
+    item: { id: userItem.id }, // we only need the id in the drop
     collect: monitor => ({
       isDragging: !!monitor.isDragging(),
     }),
   }));
 
-  const modifyByValue = (event: ChangeEvent<HTMLInputElement>, item: UserItemType, key: keyof UserItemType) => {
-    const value = parseValue(event);
-    const modifiedItem = { ...item, [key]: value };
-    dispatch(setUserItem(modifiedItem));
-  };
-
-  const modifyByChecked = (event: ChangeEvent<HTMLInputElement>, item: UserItemType, key: keyof UserItemType) => {
-    const modifiedItem = { ...item, [key]: event.target.checked };
+  const modifyItem = (event: ChangeEvent<HTMLInputElement>, item: UserItemType, key?: keyof UserItemType) => {
+    const value = parseEventToValue(event);
+    const modifiedItem = { ...item, [key ?? event.target.name]: value };
     dispatch(setUserItem(modifiedItem));
   };
 
@@ -36,25 +31,25 @@ const UserItem = ({ userItemId }: { userItemId: UUID }) => {
         name="name"
         type="text"
         value={name ?? ''}
-        onChange={(e) => modifyByValue(e, userItem, 'name')}
+        onChange={(e) => modifyItem(e, userItem)}
       />
       <input
         name="description"
         type="text"
         value={description ?? ''}
-        onChange={(e) => modifyByValue(e, userItem, 'description')}
+        onChange={(e) => modifyItem(e, userItem)}
       />
       <input
         name="weight"
         type="number"
         value={weight ?? ''}
-        onChange={(e) => modifyByValue(e, userItem, 'weight')}
+        onChange={(e) => modifyItem(e, userItem)}
       />
       <input
         name="publicVisibility"
         type="checkbox"
         checked={publicVisibility}
-        onChange={(e) => modifyByChecked(e, userItem, 'publicVisibility')}
+        onChange={(e) => modifyItem(e, userItem)}
       />
       <button onClick={() => dispatch(removeUserItem(id))}>X</button>
     </div>

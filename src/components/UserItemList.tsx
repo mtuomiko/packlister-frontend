@@ -1,6 +1,6 @@
 import React from 'react';
 import { useAppDispatch, useAppSelector } from '../hooks';
-import { setUserItem, selectUserItemIds } from '../slices/userItemsSlice';
+import { setUserItem, selectUserItemIds } from '../slices/userItemSlice';
 import { UserItem as UserItemType } from '../types';
 import { v4 as uuidv4 } from 'uuid';
 import UserItem from './UserItem';

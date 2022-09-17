@@ -8,12 +8,29 @@ export interface UserItem {
   publicVisibility: boolean
 };
 
-export interface Packlist {
+export interface PacklistBase {
+  id: UUID
+  name?: string
+};
+
+export interface PacklistLimited extends PacklistBase {
+  type: 'limited'
+}
+
+export interface PacklistComplete extends PacklistBase {
+  type: 'complete'
+  description?: string
+  categoryIds: string[]
+}
+
+export interface PacklistDto {
   id: UUID
   name?: string
   description?: string
-  categoryIds: string[]
-};
+  categories: Category[]
+}
+
+export type Packlist = PacklistLimited | PacklistComplete;
 
 export interface Category {
   id: UUID
@@ -46,6 +63,10 @@ export interface TokenResponse {
   email: string
 };
 
-export interface UserItemResponse {
+export interface UserItemsResponse {
   userItems: UserItem[]
+};
+
+export interface PacklistsResponse {
+  packlists: PacklistBase[]
 };

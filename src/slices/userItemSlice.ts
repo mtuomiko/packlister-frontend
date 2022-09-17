@@ -1,7 +1,7 @@
 import { createAsyncThunk, createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { RootState } from '../store';
-import { UserItem, UserItemResponse, UUID } from '../types';
-import userItemsService from '../services/userItems';
+import { UserItem, UserItemsResponse, UUID } from '../types';
+import userItemsService from '../services/userItem';
 import pickBy from 'lodash/pickBy';
 
 export interface UserItemsState {
@@ -22,7 +22,7 @@ const initialState: UserItemsState = {
   deletedIds: []
 };
 
-export const getAll = createAsyncThunk('items/getAll', async () => {
+export const getAllUserItems = createAsyncThunk('items/getAll', async () => {
   const response = await userItemsService.getAll();
   return response;
 });
@@ -33,11 +33,9 @@ export const getAll = createAsyncThunk('items/getAll', async () => {
  * state to then get the actual user item data.
  */
 export const batchUpsert = createAsyncThunk<
-  UserItemResponse,
+  UserItemsResponse,
   UUID[],
-  {
-    state: RootState
-  }
+  { state: RootState }
 >('items/batchUpsert', async (userItemIds: UUID[], { getState }) => {
   const userItems = selectUserItems(getState());
   const itemsToUpsert = Object.values(
@@ -52,7 +50,7 @@ export const batchDelete = createAsyncThunk('items/batchDelete', async (userItem
   return userItemIds;
 });
 
-export const userItemsSlice = createSlice({
+export const userItemSlice = createSlice({
   name: 'items',
   initialState,
   // automagically wrapped with immer so redux state modification is ok
@@ -79,18 +77,17 @@ export const userItemsSlice = createSlice({
   },
   extraReducers: builder => {
     builder
-      .addCase(getAll.fulfilled, (state, action) => {
-        const receivedItems = action.payload.userItems.reduce(
+      .addCase(getAllUserItems.fulfilled, (state, action) => {
+        const allItems = action.payload.userItems.reduce(
           (memo, item) => ({ ...memo, [item.id]: item }),
-          {}
+          state.userItems.byId
         );
-        const receivedItemIds = Object.keys(receivedItems);
+        const allIds = Object.keys(allItems);
         // possible items coming from "offline use" use should be retained
-        const allItems = { ...state.userItems.byId, ...receivedItems };
         state.userItems.byId = allItems;
-        state.userItems.allIds = [...state.userItems.allIds, ...receivedItemIds];
+        state.userItems.allIds = allIds;
       })
-      .addCase(getAll.rejected, (_state, action) => {
+      .addCase(getAllUserItems.rejected, (_state, action) => {
         console.error(action.error);
         console.error(action.payload);
       })
@@ -109,7 +106,7 @@ export const userItemsSlice = createSlice({
   }
 });
 
-export const { setUserItem, removeUserItem } = userItemsSlice.actions;
+export const { setUserItem, removeUserItem } = userItemSlice.actions;
 
 export const selectUserItems = (state: RootState) => state.items.userItems.byId;
 export const selectUserItemIds = (state: RootState) => state.items.userItems.allIds;
@@ -117,4 +114,4 @@ export const selectUserItemById = (state: RootState, id: UUID) => selectUserItem
 export const selectDirtyIds = (state: RootState) => state.items.dirtyIds;
 export const selectDeletedIds = (state: RootState) => state.items.deletedIds;
 
-export default userItemsSlice.reducer;
+export default userItemSlice.reducer;

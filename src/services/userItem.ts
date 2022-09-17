@@ -1,16 +1,16 @@
 import axios from './axiosConfig';
-import { UserItem, UserItemResponse } from '../types';
+import { UserItem, UserItemsResponse } from '../types';
 
 const baseUrl = 'http://localhost:8080/api/items';
 
 const getAll = async () => {
-  const response = await axios.get<UserItemResponse>(baseUrl);
+  const response = await axios.get<UserItemsResponse>(baseUrl);
   return response.data;
 };
 
 const batchUpsert = async (userItems: UserItem[]) => {
   const body = { userItems };
-  const response = await axios.put<UserItemResponse>(`${baseUrl}/batch`, body);
+  const response = await axios.put<UserItemsResponse>(`${baseUrl}/batch`, body);
   return response.data;
 };
 

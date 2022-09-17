@@ -1,6 +1,6 @@
 import { AuthState } from './slices/authSlice';
-import { PacklistsState } from './slices/packlistsSlice';
-import { UserItemsState } from './slices/userItemsSlice';
+import { PacklistsState } from './slices/packlistSlice';
+import { UserItemsState } from './slices/userItemSlice';
 import { RootState } from './store';
 
 interface StorageState {

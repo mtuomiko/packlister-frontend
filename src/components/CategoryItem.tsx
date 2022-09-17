@@ -1,6 +1,6 @@
 import React from 'react';
 import { useAppSelector } from '../hooks';
-import { selectUserItemById } from '../slices/userItemsSlice';
+import { selectUserItemById } from '../slices/userItemSlice';
 import { CategoryItem as CategoryItemType } from '../types';
 
 const CategoryItem = ({ categoryItem }: { categoryItem: CategoryItemType }) => {

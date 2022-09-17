@@ -26,6 +26,8 @@ export const categoriesSlice = createSlice({
       delete state[action.payload];
     },
   }
+  // TODO: Add listener reducer for getOnePacklist in order to add categories to state. Packlist reducer only sets the
+  // category ids for the packlist but the actual categories are currently not used.
 });
 
 export const { setCategory, removeCategory } = categoriesSlice.actions;

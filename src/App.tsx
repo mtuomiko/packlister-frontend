@@ -4,7 +4,7 @@ import LoginForm from './components/LoginForm';
 import Profile from './components/Profile';
 import { useAppDispatch, useAppSelector } from './hooks';
 import { selectAuth } from './slices/authSlice';
-import { batchDelete, batchUpsert, getAll, selectDeletedIds, selectDirtyIds } from './slices/userItemsSlice';
+import { batchDelete, batchUpsert, getAllUserItems, selectDeletedIds, selectDirtyIds } from './slices/userItemSlice';
 import DragDisplay from './components/DragDisplay';
 
 const App = () => {
@@ -17,7 +17,7 @@ const App = () => {
   useEffect(() => {
     const getData = async () => {
       if (auth === null) { return; }
-      await dispatch(getAll());
+      await dispatch(getAllUserItems());
     };
 
     void getData();

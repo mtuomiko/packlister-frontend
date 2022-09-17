@@ -18,12 +18,14 @@ module.exports = {
   output: {
     filename: 'main.js',
     path: path.resolve(__dirname, 'build'),
+    publicPath: '/'
   },
   devServer: {
     static: path.resolve(__dirname, 'build'),
     compress: true,
     port: process.env.PORT || 3000,
     hot: true,
+    historyApiFallback: true
   },
   devtool: 'source-map',
   plugins: [
