@@ -56,6 +56,15 @@ const Category = ({ categoryId }: { categoryId: UUID }) => {
     dispatch(setCategory(modifiedCategory));
   };
 
+  const modifyCategoryItem = (categoryItem: CategoryItemType) => {
+    const modifiedItems = category.items.map(item => item.userItemId === categoryItem.userItemId
+      ? categoryItem
+      : item);
+    const modifiedCategory = { ...category, items: modifiedItems };
+    console.log(modifiedCategory);
+    dispatch(setCategory(modifiedCategory));
+  };
+
   return (
     <div ref={drop} style={{ position: 'relative' }}>
       <input
@@ -66,7 +75,7 @@ const Category = ({ categoryId }: { categoryId: UUID }) => {
         onChange={modifyByValue}
       />
       {category.items.map(categoryItem => (
-        <CategoryItem key={categoryItem.userItemId} categoryItem={categoryItem} />
+        <CategoryItem key={categoryItem.userItemId} categoryItem={categoryItem} modifyCategoryItem={modifyCategoryItem} />
       ))}
       <div>
         <button onClick={addNewItem}>Add new item</button>

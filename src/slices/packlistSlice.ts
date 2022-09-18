@@ -24,17 +24,39 @@ export const getPacklistComplete = createAsyncThunk('packlists/getOne', async (i
 );
 
 /**
- * Populates the packlist (category ids to actual categories) from global state.
+ * Populates the packlist (category ids to actual categories) from global state and removes type property that's
+ * internal to frontend.
  */
-export const upsertPacklist = createAsyncThunk<
-  PacklistDto,
-  PacklistComplete,
-  { state: RootState }
->('packlists/upsertOne', async (packlist: PacklistComplete, { getState }) => {
-  const allCategories = selectCategories(getState());
+const packlistToDto = (packlist: PacklistComplete, state: RootState): PacklistDto => {
+  const allCategories = selectCategories(state);
   const categories = packlist.categoryIds.map(id => allCategories[id]);
   const { type: _type, categoryIds: _categoryIds, ...strippedPacklist } = packlist;
   const populatedPacklist: PacklistDto = { ...strippedPacklist, categories };
+  return populatedPacklist;
+};
+
+const depopulatePacklist = (packlist: PacklistDto) => {
+  const categoryIds: UUID[] = packlist.categories.map(category => category.id);
+  const { categories: _categories, ...strippedPacklist } = packlist;
+  const depopulatedPacklist: PacklistComplete = { ...strippedPacklist, categoryIds, type: 'complete' };
+  return depopulatedPacklist;
+};
+
+export const createPacklist = createAsyncThunk<
+  PacklistDto,
+  PacklistComplete,
+  { state: RootState }
+>('packlists/createOne', async (packlist: PacklistComplete, { getState }) => {
+  const populatedPacklist = packlistToDto(packlist, getState());
+  return await packlistService.postPacklist(populatedPacklist);
+});
+
+export const updatePacklist = createAsyncThunk<
+  PacklistDto,
+  PacklistComplete,
+  { state: RootState }
+>('packlists/updateOne', async (packlist: PacklistComplete, { getState }) => {
+  const populatedPacklist = packlistToDto(packlist, getState());
   return await packlistService.putPacklist(populatedPacklist);
 });
 
@@ -72,16 +94,13 @@ export const packlistSlice = createSlice({
         return allPacklists;
       })
       .addCase(getPacklistComplete.fulfilled, (state, action) => {
-        const categoryIds = action.payload.categories.map(category => category.id);
-        const { categories: _categories, ...strippedPacklist } = action.payload;
-        const depopulatedPacklist = { ...strippedPacklist, categoryIds };
-        state[action.payload.id] = { ...depopulatedPacklist, type: 'complete' };
+        state[action.payload.id] = depopulatePacklist(action.payload);
       })
-      .addCase(upsertPacklist.fulfilled, (state, action) => {
-        const categoryIds = action.payload.categories.map(category => category.id);
-        const { categories: _categories, ...strippedPacklist } = action.payload;
-        const depopulatedPacklist = { ...strippedPacklist, categoryIds };
-        state[action.payload.id] = { ...depopulatedPacklist, type: 'complete' };
+      .addCase(createPacklist.fulfilled, (state, action) => {
+        state[action.payload.id] = depopulatePacklist(action.payload);
+      })
+      .addCase(updatePacklist.fulfilled, (state, action) => {
+        state[action.payload.id] = depopulatePacklist(action.payload);
       });
   }
 });

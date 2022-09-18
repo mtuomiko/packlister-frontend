@@ -1,6 +1,7 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { RootState } from '../store';
 import { Category, UUID } from '../types';
+import { getPacklistComplete, updatePacklist } from './packlistSlice';
 
 export interface CategoriesState {
   [id: UUID]: Category
@@ -12,6 +13,20 @@ export interface CategoryWithPacklist {
 }
 
 const initialState: CategoriesState = {};
+
+interface HasId {
+  id: UUID
+}
+
+const reduceToByIdObject = <T extends HasId>(
+  initial: { [id: UUID]: T },
+  list: T[]
+) => {
+  return list.reduce(
+    (memo, element) => ({ ...memo, [element.id]: element }),
+    initial
+  );
+};
 
 export const categoriesSlice = createSlice({
   name: 'categories',
@@ -25,9 +40,16 @@ export const categoriesSlice = createSlice({
       // eslint-disable-next-line @typescript-eslint/no-dynamic-delete
       delete state[action.payload];
     },
+  },
+  extraReducers: builder => {
+    builder
+      .addCase(getPacklistComplete.fulfilled, (state, action) => {
+        return reduceToByIdObject(state, action.payload.categories);
+      })
+      .addCase(updatePacklist.fulfilled, (state, action) => {
+        return reduceToByIdObject(state, action.payload.categories);
+      });
   }
-  // TODO: Add listener reducer for getOnePacklist in order to add categories to state. Packlist reducer only sets the
-  // category ids for the packlist but the actual categories are currently not used.
 });
 
 export const { setCategory, removeCategory } = categoriesSlice.actions;

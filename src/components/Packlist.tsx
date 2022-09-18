@@ -1,6 +1,6 @@
 import React, { ChangeEvent, useEffect } from 'react';
 import { useAppDispatch, useAppSelector } from '../hooks';
-import { setPacklist, addCategoryToPacklist, selectPacklistById, getPacklistComplete } from '../slices/packlistSlice';
+import { setPacklist, addCategoryToPacklist, selectPacklistById, getPacklistComplete, updatePacklist } from '../slices/packlistSlice';
 import { useParams } from 'react-router-dom';
 import { Category as CategoryType, Packlist as PacklistType } from '../types';
 import { v4 as uuidv4 } from 'uuid';
@@ -19,7 +19,8 @@ const Packlist = () => {
 
   const auth = useAppSelector(selectAuth);
   const packlist = useAppSelector(state => {
-    return selectPacklistById(state, packlistId) as PacklistType | undefined; // state cannot guarantee existence
+    // state cannot guarantee existence for any id param
+    return selectPacklistById(state, packlistId) as PacklistType | undefined;
   });
 
   useEffect(() => {
@@ -41,6 +42,10 @@ const Packlist = () => {
   const modifyByValue = (event: ChangeEvent<HTMLInputElement>) => {
     const modifiedPacklist = { ...packlist, [event.target.name]: event.target.value };
     dispatch(setPacklist(modifiedPacklist));
+  };
+
+  const savePacklist = () => {
+    void dispatch(updatePacklist(packlist));
   };
 
   const addNewCategory = () => {
@@ -71,6 +76,9 @@ const Packlist = () => {
           value={packlist.description ?? ''}
           onChange={(e) => modifyByValue(e)}
         />
+      </div>
+      <div>
+        <button onClick={savePacklist}>Save</button>
       </div>
       {packlist.categoryIds.map(categoryId =>
         <Category key={categoryId} categoryId={categoryId} />

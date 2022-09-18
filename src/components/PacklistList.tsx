@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import { useAppDispatch, useAppSelector } from '../hooks';
-import { setPacklist, removePacklist, selectPacklists, upsertPacklist, getAllPacklists } from '../slices/packlistSlice';
+import { setPacklist, removePacklist, selectPacklists, getAllPacklists, createPacklist } from '../slices/packlistSlice';
 import { PacklistComplete } from '../types';
 import { v4 as uuidv4 } from 'uuid';
 import { Link } from 'react-router-dom';
@@ -29,7 +29,7 @@ const PacklistList = () => {
     };
 
     if (auth !== null) {
-      void dispatch(upsertPacklist(newPacklist));
+      void dispatch(createPacklist(newPacklist));
     } else {
       dispatch(setPacklist(newPacklist));
     }

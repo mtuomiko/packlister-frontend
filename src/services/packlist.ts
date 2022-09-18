@@ -13,9 +13,14 @@ const getOneById = async (id: UUID) => {
   return response.data;
 };
 
+const postPacklist = async (packlist: PacklistDto) => {
+  const response = await axios.post<PacklistDto>(`${baseUrl}/${packlist.id}`, packlist);
+  return response.data;
+};
+
 const putPacklist = async (packlist: PacklistDto) => {
   const response = await axios.put<PacklistDto>(`${baseUrl}/${packlist.id}`, packlist);
   return response.data;
 };
 
-export default { getAll, getOneById, putPacklist };
+export default { getAll, getOneById, postPacklist, putPacklist };

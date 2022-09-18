@@ -9,8 +9,8 @@ export interface UserItemsState {
     byId: { [id: UUID]: UserItem }
     allIds: UUID[]
   }
-  dirtyIds: UUID[]
-  deletedIds: UUID[]
+  dirtyIds: UUID[] // modified and not sent to server
+  deletedIds: UUID[] // deleted but not deleted on server
 }
 
 const initialState: UserItemsState = {

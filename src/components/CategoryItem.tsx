@@ -1,10 +1,20 @@
-import React from 'react';
+import React, { ChangeEvent } from 'react';
 import { useAppSelector } from '../hooks';
 import { selectUserItemById } from '../slices/userItemSlice';
 import { CategoryItem as CategoryItemType } from '../types';
+import { parseEventToValue } from '../utils/inputUtils';
 
-const CategoryItem = ({ categoryItem }: { categoryItem: CategoryItemType }) => {
+const CategoryItem = ({ categoryItem, modifyCategoryItem }: {
+  categoryItem: CategoryItemType
+  modifyCategoryItem: (categoryItem: CategoryItemType) => void
+}) => {
   const userItem = useAppSelector(state => selectUserItemById(state, categoryItem.userItemId));
+
+  const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
+    const value = parseEventToValue(event);
+    const modifiedCategoryItem = { ...categoryItem, [event.target.name]: value };
+    modifyCategoryItem(modifiedCategoryItem);
+  };
 
   return (
     <div key={categoryItem.userItemId}>
@@ -30,12 +40,12 @@ const CategoryItem = ({ categoryItem }: { categoryItem: CategoryItemType }) => {
         name="quantity"
         type="number"
         value={categoryItem.quantity ?? ''}
-        readOnly
+        onChange={handleChange}
       />
       <input
         name="totalWeight"
         type="number"
-        value={userItem.weight ?? 0 * categoryItem.quantity}
+        value={(userItem.weight ?? 0) * categoryItem.quantity}
         readOnly
       />
     </div>
