@@ -1,10 +1,15 @@
 import axios from 'axios';
 import { StoreType } from '../store';
 
-const instance = axios.create();
+const instance = axios.create({
+  baseURL: API_BASE_URL
+});
 
 let store: StoreType | undefined;
 
+/**
+ * Store injection to avoid circular dependencies. Call preferrably at an early point in the application.
+ */
 export const injectStore = (injectStore: StoreType) => {
   store = injectStore;
 };

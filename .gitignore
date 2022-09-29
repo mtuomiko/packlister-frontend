@@ -4,3 +4,6 @@
 # Keep build directory
 !/build/
 !/build/.gitkeep
+
+.env
+sourcemap.html

@@ -35,6 +35,10 @@ const packlistToDto = (packlist: PacklistComplete, state: RootState): PacklistDt
   return populatedPacklist;
 };
 
+/**
+ * Unpacks packlist from backend to front end model where actual categories are replaced by just categoryIds. Also adds
+ * type string in the model.
+ */
 const depopulatePacklist = (packlist: PacklistDto) => {
   const categoryIds: UUID[] = packlist.categories.map(category => category.id);
   const { categories: _categories, ...strippedPacklist } = packlist;

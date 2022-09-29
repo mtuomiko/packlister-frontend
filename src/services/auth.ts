@@ -1,15 +1,15 @@
 import axios from './axiosConfig';
 import { Credentials, RegistrationInfo, TokenResponse, UserResponse } from '../types';
 
-const baseUrl = 'http://localhost:8080/api/auth';
+const rootEndpoint = '/auth';
 
 const register = async (registrationInfo: RegistrationInfo) => {
-  const response = await axios.post<UserResponse>(`${baseUrl}/register`, registrationInfo);
+  const response = await axios.post<UserResponse>(`${rootEndpoint}/register`, registrationInfo);
   return response.data;
 };
 
 const token = async (credentials: Credentials) => {
-  const response = await axios.post<TokenResponse>(`${baseUrl}/token`, credentials);
+  const response = await axios.post<TokenResponse>(`${rootEndpoint}/token`, credentials);
   return response.data;
 };
 
