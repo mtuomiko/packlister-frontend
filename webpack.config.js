@@ -5,13 +5,10 @@ const webpack = require('webpack');
 
 const config = (env, argv) => {
   const devServerPort = process.env.DEV_PORT ?? 3003;
-  // production builds need to define url
+  // Production builds default to relative path.
   const apiBaseUrl = argv.mode === 'production'
-    ? process.env.API_BASE_URL
+    ? process.env.API_BASE_URL ?? '/api'
     : process.env.API_BASE_URL ?? 'http://localhost:8080/api';
-  if (apiBaseUrl === undefined) {
-    throw new Error('Missing value for API_BASE_URL');
-  }
 
   return {
     entry: './src/index.tsx',

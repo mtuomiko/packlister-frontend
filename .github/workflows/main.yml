@@ -1,0 +1,29 @@
+name: Main verification pipeline
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+    types:
+      - opened
+      - synchronize
+
+jobs:
+  verification_pipeline:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v3
+      - name: Setup node
+        uses: actions/setup-node@v3
+        with:
+          node-version: 16
+      - name: npm ci
+        run: npm ci
+      - name: lint
+        run: npm run lint
+      - name: build
+        run: npm run build
