@@ -2,14 +2,10 @@ import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { RootState } from '../store';
 import { Category, UUID } from '../types';
 import { getPacklistComplete, updatePacklist } from './packlistSlice';
+import { removeUserItem } from './userItemSlice';
 
 export interface CategoriesState {
   [id: UUID]: Category
-}
-
-export interface CategoryWithPacklist {
-  packlistId: UUID
-  category: Category
 }
 
 const initialState: CategoriesState = {};
@@ -18,11 +14,19 @@ interface HasId {
   id: UUID
 }
 
+/**
+ * Reduces the list argument into the initial object resulting in a new object with ids as keys and the objects as
+ * values. Objects with same id will be overwritten in the initial object.
+ *
+ * @param initial Object used as the initial state for reducing
+ * @param objectsWithId List of objects with id property
+ * @returns A new modified list containing the initial objects and objects from list.
+ */
 const reduceToByIdObject = <T extends HasId>(
   initial: { [id: UUID]: T },
-  list: T[]
+  objectsWithId: T[]
 ) => {
-  return list.reduce(
+  return objectsWithId.reduce(
     (memo, element) => ({ ...memo, [element.id]: element }),
     initial
   );
@@ -48,6 +52,14 @@ export const categoriesSlice = createSlice({
       })
       .addCase(updatePacklist.fulfilled, (state, action) => {
         return reduceToByIdObject(state, action.payload.categories);
+      })
+      .addCase(removeUserItem, (state, action) => {
+        // user item removal, remove any usage of the item in categories
+        const removedUserItemId = action.payload;
+        Object.values(state).forEach(category => {
+          const newCategoryItems = category.items.filter(categoryItem => categoryItem.userItemId !== removedUserItemId);
+          category.items = newCategoryItems;
+        });
       });
   }
 });

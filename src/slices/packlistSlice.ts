@@ -3,6 +3,7 @@ import { RootState } from '../store';
 import { Packlist, PacklistComplete, PacklistDto, UUID } from '../types';
 import packlistService from '../services/packlist';
 import { selectCategories } from './categorySlice';
+import { selectUserItemIds } from './userItemSlice';
 
 export interface PacklistsState {
   [id: UUID]: Packlist
@@ -19,12 +20,23 @@ export const getAllPacklists = createAsyncThunk('packlists/getAll', async () =>
   await packlistService.getAll()
 );
 
-export const getPacklistComplete = createAsyncThunk('packlists/getOne', async (id: UUID) =>
-  await packlistService.getOneById(id)
-);
+export const getPacklistComplete = createAsyncThunk<
+  PacklistDto,
+  UUID,
+  { state: RootState }
+>('packlists/getOne', async (id: UUID, { getState }) => {
+  // remove any stale references in category items
+  const packlist = await packlistService.getOneById(id);
+  const allUserItemIds = selectUserItemIds(getState());
+  const newCategories = packlist.categories.map(category => {
+    const newItems = category.items.filter(item => allUserItemIds.includes(item.userItemId));
+    return { ...category, items: newItems };
+  });
+  return { ...packlist, categories: newCategories };
+});
 
 /**
- * Populates the packlist (category ids to actual categories) from global state and removes type property that's
+ * Populates the packlist category ids to actual categories. Uses global state, also removes type property that's
  * internal to frontend.
  */
 const packlistToDto = (packlist: PacklistComplete, state: RootState): PacklistDto => {
@@ -36,8 +48,8 @@ const packlistToDto = (packlist: PacklistComplete, state: RootState): PacklistDt
 };
 
 /**
- * Unpacks packlist from backend to front end model where actual categories are replaced by just categoryIds. Also adds
- * type string in the model.
+ * Unpacks packlist received from backend to front end model where actual categories are replaced by just categoryIds.
+ * Categories are handled in category slice. Also adds type string in the model.
  */
 const depopulatePacklist = (packlist: PacklistDto) => {
   const categoryIds: UUID[] = packlist.categories.map(category => category.id);

@@ -9,6 +9,7 @@ const CategoryItem = ({ categoryItem, modifyCategoryItem }: {
   modifyCategoryItem: (categoryItem: CategoryItemType) => void
 }) => {
   const userItem = useAppSelector(state => selectUserItemById(state, categoryItem.userItemId));
+  if (userItem === undefined) return null;
 
   const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
     const value = parseEventToValue(event);

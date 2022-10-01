@@ -10,6 +10,8 @@ const UserItem = ({ userItemId }: { userItemId: UUID }) => {
   const userItem = useAppSelector(state => selectUserItemById(state, userItemId));
   const dispatch = useAppDispatch();
 
+  if (userItem === undefined) return null;
+
   const [{ isDragging }, drag] = useDrag(() => ({
     type: ItemTypes.USER_ITEM,
     item: { id: userItem.id }, // we only need the id in the drop

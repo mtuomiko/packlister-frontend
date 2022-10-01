@@ -9,7 +9,7 @@ export interface UserItemsState {
     byId: { [id: UUID]: UserItem }
     allIds: UUID[]
   }
-  dirtyIds: UUID[] // modified and not sent to server
+  dirtyIds: UUID[] // modified and not yet sent to server
   deletedIds: UUID[] // deleted but not deleted on server
 }
 
@@ -47,14 +47,13 @@ export const batchUpsert = createAsyncThunk<
 
 export const batchDelete = createAsyncThunk('items/batchDelete', async (userItemIds: UUID[]) => {
   await userItemsService.batchDelete(userItemIds);
+  // return deleted ids for handling in action
   return userItemIds;
 });
 
 export const userItemSlice = createSlice({
   name: 'items',
   initialState,
-  // automagically wrapped with immer so redux state modification is ok
-  // note: do not return AND modify state in same function
   reducers: {
     setUserItem: (state, action: PayloadAction<UserItem>) => {
       const id = action.payload.id;
@@ -65,13 +64,19 @@ export const userItemSlice = createSlice({
       }
     },
     removeUserItem: (state, action: PayloadAction<UUID>) => {
+      const removedId = action.payload;
       // should be fine, not using Map() instead of object due to possible issues with Redux
       // eslint-disable-next-line @typescript-eslint/no-dynamic-delete
-      delete state.userItems.byId[action.payload];
-      const index = state.userItems.allIds.indexOf(action.payload);
+      delete state.userItems.byId[removedId];
+      const index = state.userItems.allIds.indexOf(removedId);
       state.userItems.allIds.splice(index, 1);
-      if (!state.deletedIds.includes(action.payload)) {
-        state.deletedIds.push(action.payload);
+      if (!state.deletedIds.includes(removedId)) {
+        state.deletedIds.push(removedId);
+      }
+      // removed item can no longer be dirty (it doesn't exist)
+      const dirtyIndex = state.dirtyIds.indexOf(removedId);
+      if (dirtyIndex !== -1) {
+        state.dirtyIds.splice(dirtyIndex, 1);
       }
     },
   },
@@ -110,7 +115,10 @@ export const { setUserItem, removeUserItem } = userItemSlice.actions;
 
 export const selectUserItems = (state: RootState) => state.items.userItems.byId;
 export const selectUserItemIds = (state: RootState) => state.items.userItems.allIds;
-export const selectUserItemById = (state: RootState, id: UUID) => selectUserItems(state)[id];
+// Make consumers check that the UserItem exists
+export const selectUserItemById = (state: RootState, id: UUID): UserItem | undefined => {
+  return selectUserItems(state)[id];
+};
 export const selectDirtyIds = (state: RootState) => state.items.dirtyIds;
 export const selectDeletedIds = (state: RootState) => state.items.deletedIds;
 
