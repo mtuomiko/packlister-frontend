@@ -7,6 +7,7 @@ import { v4 as uuidv4 } from 'uuid';
 import Category from './Category';
 import { setCategory } from '../slices/categorySlice';
 import { selectAuth } from '../slices/authSlice';
+import CategorySummary from './CategorySummary';
 
 const Packlist = () => {
   const params = useParams();
@@ -80,6 +81,7 @@ const Packlist = () => {
       <div>
         <button onClick={savePacklist}>Save</button>
       </div>
+      <CategorySummary categoryIds={packlist.categoryIds} />
       {packlist.categoryIds.map(categoryId =>
         <Category key={categoryId} categoryId={categoryId} />
       )}

@@ -67,7 +67,9 @@ export const categoriesSlice = createSlice({
 export const { setCategory, removeCategory } = categoriesSlice.actions;
 
 export const selectCategories = (state: RootState) => state.categories;
-
 export const selectCategoryById = (state: RootState, id: UUID) => state.categories[id];
+export const selectCategoryArrayByIds = (state: RootState, ids: UUID[]) => {
+  return Object.values(state.categories).filter(category => ids.includes(category.id));
+};
 
 export default categoriesSlice.reducer;
