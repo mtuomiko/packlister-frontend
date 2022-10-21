@@ -1,6 +1,7 @@
 require('dotenv').config();
 const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
+const CopyPlugin = require('copy-webpack-plugin');
 const webpack = require('webpack');
 
 const config = (env, argv) => {
@@ -23,6 +24,7 @@ const config = (env, argv) => {
     },
     resolve: {
       extensions: ['.tsx', '.ts', '.js'],
+      modules: [path.resolve(__dirname, 'src'), 'node_modules'],
     },
     output: {
       filename: 'main.js',
@@ -34,7 +36,8 @@ const config = (env, argv) => {
       compress: true,
       port: devServerPort,
       hot: true,
-      historyApiFallback: true
+      historyApiFallback: true,
+      allowedHosts: 'all'
     },
     devtool: 'source-map',
     plugins: [
@@ -44,6 +47,13 @@ const config = (env, argv) => {
       }),
       new webpack.DefinePlugin({
         API_BASE_URL: JSON.stringify(apiBaseUrl)
+      }),
+      new CopyPlugin({
+        patterns: [
+          {
+            from: './assets/favicon'
+          }
+        ]
       })
     ]
   };

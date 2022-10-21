@@ -1,34 +1,54 @@
-import React, { FormEventHandler } from 'react';
-import { useAppDispatch } from '../hooks';
-import { useField } from '../hooks/useField';
-import { login } from '../slices/authSlice';
+import { Button, Flex, FormControl, FormLabel, Heading, Input, Stack } from '@chakra-ui/react';
+import React, { FormEventHandler, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useAppDispatch, useAppSelector } from 'hooks/reduxHooks';
+import { useField } from 'hooks/useField';
+import { login, selectAuth } from 'slices/authSlice';
 
 const LoginForm = () => {
+  const navigate = useNavigate();
+  const auth = useAppSelector(selectAuth);
+
+  useEffect(() => {
+    if (auth !== null) {
+      navigate('/', { replace: true });
+    }
+  }, [auth]);
+
   const dispatch = useAppDispatch();
   const username = useField('text');
   const password = useField('password');
 
-  // dispatching async logic on the handler
-  // eslint-disable-next-line @typescript-eslint/no-misused-promises
-  const handleLogin: FormEventHandler<HTMLFormElement> = async (event) => {
+  const handleLogin: FormEventHandler<HTMLFormElement> = (event) => {
     event.preventDefault();
     if (username.value === '' || password.value === '') { return; }
-    await dispatch(login({ username: username.value, password: password.value }));
+    void dispatch(login({ username: username.value, password: password.value }));
     // username.reset();
     // password.reset();
   };
 
   return (
-    <div>
-      <h3>Login</h3>
+    <Flex
+      flexDirection="column"
+      alignItems="center"
+    >
+      <Heading>Login</Heading>
       <form onSubmit={handleLogin}>
-        <label>Username</label>
-        <input name='username' {...username.inputVars} />
-        <label>Password</label>
-        <input name='password' {...password.inputVars} />
-        <input type="submit" value="Login" />
+        <Stack spacing={4}>
+          <FormControl isRequired>
+            <FormLabel>Username</FormLabel>
+            <Input placeholder="Username" name="username" {...username.inputVars} />
+          </FormControl>
+          <FormControl isRequired>
+            <FormLabel>Password</FormLabel>
+            <Input placeholder="Password" name="password" {...password.inputVars} />
+          </FormControl>
+          <Button type="submit" width="full">
+            Login
+          </Button>
+        </Stack>
       </form>
-    </div>
+    </Flex>
   );
 };
 

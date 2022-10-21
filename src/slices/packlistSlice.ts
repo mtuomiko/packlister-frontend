@@ -1,12 +1,15 @@
 import { createAsyncThunk, createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { RootState } from '../store';
-import { Packlist, PacklistComplete, PacklistDto, UUID } from '../types';
+import { RootState, ThunkApi } from '../store';
+import { Packlist, PacklistComplete, PacklistDto, PacklistsResponse, Status, UUID } from '../types';
 import packlistService from '../services/packlist';
 import { selectCategories } from './categorySlice';
 import { selectUserItemIds } from './userItemSlice';
 
 export interface PacklistsState {
-  [id: UUID]: Packlist
+  packlists: {
+    [id: UUID]: Packlist
+  }
+  status: Status
 }
 
 export interface CategoryIdWithPacklistId {
@@ -14,17 +17,35 @@ export interface CategoryIdWithPacklistId {
   categoryId: UUID
 }
 
-const initialState: PacklistsState = {};
+export const initialPacklistsState: PacklistsState = {
+  packlists: {},
+  status: Status.Idle
+};
 
-export const getAllPacklists = createAsyncThunk('packlists/getAll', async () =>
-  await packlistService.getAll()
+const packlistsSliceName = 'packlists';
+
+export const getAllPacklists = createAsyncThunk<
+  // createAsyncThunk needs an void argument if no actual arguments used
+  // eslint-disable-next-line @typescript-eslint/no-invalid-void-type
+  PacklistsResponse, void, ThunkApi
+>(
+  `${packlistsSliceName}/getAll`,
+  async (_) => await packlistService.getAll(),
+  {
+    condition: (_, { getState }) => {
+      const status = getState().packlists.status;
+      if (status === Status.Succeeded || status === Status.Loading) {
+        return false;
+      }
+    }
+  }
 );
 
 export const getPacklistComplete = createAsyncThunk<
   PacklistDto,
   UUID,
   { state: RootState }
->('packlists/getOne', async (id: UUID, { getState }) => {
+>(`${packlistsSliceName}/getOne`, async (id: UUID, { getState }) => {
   // remove any stale references in category items
   const packlist = await packlistService.getOneById(id);
   const allUserItemIds = selectUserItemIds(getState());
@@ -62,7 +83,7 @@ export const createPacklist = createAsyncThunk<
   PacklistDto,
   PacklistComplete,
   { state: RootState }
->('packlists/createOne', async (packlist: PacklistComplete, { getState }) => {
+>(`${packlistsSliceName}/createOne`, async (packlist: PacklistComplete, { getState }) => {
   const populatedPacklist = packlistToDto(packlist, getState());
   return await packlistService.postPacklist(populatedPacklist);
 });
@@ -71,60 +92,63 @@ export const updatePacklist = createAsyncThunk<
   PacklistDto,
   PacklistComplete,
   { state: RootState }
->('packlists/updateOne', async (packlist: PacklistComplete, { getState }) => {
+>(`${packlistsSliceName}/updateOne`, async (packlist: PacklistComplete, { getState }) => {
   const populatedPacklist = packlistToDto(packlist, getState());
   return await packlistService.putPacklist(populatedPacklist);
 });
 
 export const packlistSlice = createSlice({
-  name: 'packlists',
-  initialState,
+  name: packlistsSliceName,
+  initialState: initialPacklistsState,
   // automagically wrapped with immer so redux state modification is ok
   // note: do not return AND modify state in same function
   reducers: {
     setPacklist: (state, action: PayloadAction<Packlist>) => {
-      state[action.payload.id] = action.payload;
+      state.packlists[action.payload.id] = action.payload;
     },
     removePacklist: (state, action: PayloadAction<UUID>) => {
       // should be fine, not using Map() instead of object due to possible issues with Redux
       // eslint-disable-next-line @typescript-eslint/no-dynamic-delete
-      delete state[action.payload];
+      delete state.packlists[action.payload];
     },
     addCategoryToPacklist: (state, action: PayloadAction<CategoryIdWithPacklistId>) => {
-      const packlist = state[action.payload.packlistId] as PacklistComplete;
+      const packlist = state.packlists[action.payload.packlistId] as PacklistComplete;
       packlist.categoryIds.push(action.payload.categoryId);
     },
     removeCategoryFromPacklist: (state, action: PayloadAction<CategoryIdWithPacklistId>) => {
-      const packlist = state[action.payload.packlistId] as PacklistComplete;
+      const packlist = state.packlists[action.payload.packlistId] as PacklistComplete;
       const index = packlist.categoryIds.indexOf(action.payload.categoryId);
       packlist.categoryIds.splice(index, 1);
     },
   },
   extraReducers: builder => {
     builder
-      .addCase(getAllPacklists.fulfilled, (state, action) => {
-        const allPacklists: PacklistsState = action.payload.packlists.reduce(
+      .addCase(getAllPacklists.pending, (state, _action) => {
+        state.status = Status.Loading;
+      })
+      .addCase(getAllPacklists.fulfilled, (_state, action) => {
+        const allPacklists = action.payload.packlists.reduce(
           (memo, packlist) => ({ ...memo, [packlist.id]: { ...packlist, type: 'limited' } }),
           {}
         );
-        return allPacklists;
+        return { packlists: allPacklists, status: Status.Succeeded };
       })
       .addCase(getPacklistComplete.fulfilled, (state, action) => {
-        state[action.payload.id] = depopulatePacklist(action.payload);
+        state.packlists[action.payload.id] = depopulatePacklist(action.payload);
       })
       .addCase(createPacklist.fulfilled, (state, action) => {
-        state[action.payload.id] = depopulatePacklist(action.payload);
+        state.packlists[action.payload.id] = depopulatePacklist(action.payload);
       })
       .addCase(updatePacklist.fulfilled, (state, action) => {
-        state[action.payload.id] = depopulatePacklist(action.payload);
+        state.packlists[action.payload.id] = depopulatePacklist(action.payload);
       });
   }
 });
 
 export const { setPacklist, removePacklist, addCategoryToPacklist, removeCategoryFromPacklist } = packlistSlice.actions;
 
-export const selectPacklists = (state: RootState) => state.packlists;
+export const selectPacklists = (state: RootState) => state.packlists.packlists;
 
-export const selectPacklistById = (state: RootState, id: UUID) => state.packlists[id];
+export const selectPacklistById = (state: RootState, id: UUID) => state.packlists.packlists[id];
 
 export default packlistSlice.reducer;

@@ -1,8 +1,8 @@
 import React, { ChangeEvent } from 'react';
-import { useAppSelector } from '../hooks';
-import { selectUserItemById } from '../slices/userItemSlice';
-import { CategoryItem as CategoryItemType } from '../types';
-import { parseEventToValue } from '../utils/inputUtils';
+import { useAppSelector } from 'hooks/reduxHooks';
+import { selectUserItemById } from 'slices/userItemSlice';
+import { CategoryItem as CategoryItemType } from 'types';
+import { parseEventToValue } from 'utils/inputUtils';
 
 const CategoryItem = ({ categoryItem, modifyCategoryItem }: {
   categoryItem: CategoryItemType

@@ -4,6 +4,8 @@
 # Keep build directory
 !/build/
 !/build/.gitkeep
+# Loader CSS used on straight index.html
+!/build/initialLoad.css
 
 .env
 sourcemap.html

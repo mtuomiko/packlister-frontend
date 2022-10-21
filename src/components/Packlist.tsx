@@ -1,13 +1,13 @@
 import React, { ChangeEvent, useEffect } from 'react';
-import { useAppDispatch, useAppSelector } from '../hooks';
-import { setPacklist, addCategoryToPacklist, selectPacklistById, getPacklistComplete, updatePacklist } from '../slices/packlistSlice';
 import { useParams } from 'react-router-dom';
-import { Category as CategoryType, Packlist as PacklistType } from '../types';
 import { v4 as uuidv4 } from 'uuid';
-import Category from './Category';
-import { setCategory } from '../slices/categorySlice';
-import { selectAuth } from '../slices/authSlice';
-import CategorySummary from './CategorySummary';
+import { useAppDispatch, useAppSelector } from 'hooks/reduxHooks';
+import { setPacklist, addCategoryToPacklist, selectPacklistById, getPacklistComplete, updatePacklist } from 'slices/packlistSlice';
+import { Category as CategoryType, Packlist as PacklistType } from 'types';
+import { setCategory } from 'slices/categorySlice';
+import { selectAuth } from 'slices/authSlice';
+import Category from 'components/Category';
+import PacklistSummary from 'components/PacklistSummary';
 
 const Packlist = () => {
   const params = useParams();
@@ -81,7 +81,7 @@ const Packlist = () => {
       <div>
         <button onClick={savePacklist}>Save</button>
       </div>
-      <CategorySummary categoryIds={packlist.categoryIds} />
+      <PacklistSummary categoryIds={packlist.categoryIds} />
       {packlist.categoryIds.map(categoryId =>
         <Category key={categoryId} categoryId={categoryId} />
       )}

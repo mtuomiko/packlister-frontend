@@ -1,14 +1,14 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { RootState } from '../store';
-import { Category, UUID } from '../types';
-import { getPacklistComplete, updatePacklist } from './packlistSlice';
-import { removeUserItem } from './userItemSlice';
+import { RootState } from 'store';
+import { Category, UUID } from 'types';
+import { getPacklistComplete, updatePacklist } from 'slices/packlistSlice';
+import { removeUserItem } from 'slices/userItemSlice';
 
 export interface CategoriesState {
   [id: UUID]: Category
 }
 
-const initialState: CategoriesState = {};
+export const initialCategoriesState: CategoriesState = {};
 
 interface HasId {
   id: UUID
@@ -34,7 +34,7 @@ const reduceToByIdObject = <T extends HasId>(
 
 export const categoriesSlice = createSlice({
   name: 'categories',
-  initialState,
+  initialState: initialCategoriesState,
   reducers: {
     setCategory: (state, action: PayloadAction<Category>) => {
       state[action.payload.id] = action.payload;

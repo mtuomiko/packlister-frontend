@@ -1,10 +1,10 @@
-import { AnyAction, combineReducers, configureStore } from '@reduxjs/toolkit';
-import authReducer from './slices/authSlice';
-import itemReducer from './slices/userItemSlice';
-import packlistReducer from './slices/packlistSlice';
-import categoryReducer from './slices/categorySlice';
-import { loadState, saveState } from './localStorage';
+import { AnyAction, combineReducers, configureStore, isFulfilled, isRejected } from '@reduxjs/toolkit';
 import throttle from 'lodash/throttle';
+import authReducer, { initialAuthState, logout } from 'slices/authSlice';
+import itemReducer, { initialUserItemState } from 'slices/userItemSlice';
+import packlistReducer, { initialPacklistsState } from 'slices/packlistSlice';
+import categoryReducer, { initialCategoriesState } from 'slices/categorySlice';
+import { loadState, saveState } from 'utils/localStorage';
 
 const savedState = loadState();
 
@@ -17,20 +17,20 @@ const appReducer = combineReducers({
 
 export type RootState = ReturnType<typeof appReducer>;
 
+export interface ThunkApi {
+  state: RootState
+};
+
+const isRejectedLogout = isRejected(logout);
+const isFulfilledLogout = isFulfilled(logout);
+
 const rootReducer = (state: RootState, action: AnyAction) => {
-  if (action.type === 'auth/clear') {
+  if (isFulfilledLogout(action) || isRejectedLogout(action) || action.type === 'auth/clear') {
     state = {
-      auth: null,
-      items: {
-        userItems: {
-          byId: {},
-          allIds: [],
-        },
-        dirtyIds: [],
-        deletedIds: []
-      },
-      packlists: {},
-      categories: {},
+      auth: initialAuthState,
+      items: initialUserItemState,
+      packlists: initialPacklistsState,
+      categories: initialCategoriesState,
     };
   }
   return appReducer(state, action);
@@ -43,7 +43,7 @@ const store = configureStore({
 
 store.subscribe(throttle(() => {
   saveState(store.getState());
-}, 5000));
+}, 3000));
 
 export { store };
 export type StoreType = typeof store;

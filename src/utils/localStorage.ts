@@ -1,12 +1,14 @@
-import { AuthState } from './slices/authSlice';
-import { PacklistsState } from './slices/packlistSlice';
-import { UserItemsState } from './slices/userItemSlice';
-import { RootState } from './store';
+import { CategoriesState } from 'slices/categorySlice';
+import { AuthState } from 'slices/authSlice';
+import { PacklistsState } from 'slices/packlistSlice';
+import { UserItemsState } from 'slices/userItemSlice';
+import { RootState } from 'store';
 
 interface StorageState {
+  auth?: AuthState
   items?: UserItemsState
   packlists?: PacklistsState
-  auth?: AuthState
+  categories?: CategoriesState
 };
 
 const ITEM_KEY = 'state';

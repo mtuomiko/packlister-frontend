@@ -1,11 +1,10 @@
 import React, { useEffect } from 'react';
 import { Outlet } from 'react-router-dom';
-import LoginForm from './components/LoginForm';
-import Profile from './components/Profile';
-import { useAppDispatch, useAppSelector } from './hooks';
-import { selectAuth } from './slices/authSlice';
-import { batchDelete, batchUpsert, getAllUserItems, selectDeletedIds, selectDirtyIds } from './slices/userItemSlice';
-import DragDisplay from './components/DragDisplay';
+import { useAppDispatch, useAppSelector } from 'hooks/reduxHooks';
+import { selectAuth } from 'slices/authSlice';
+import { batchDelete, batchUpsert, getAllUserItems, selectDeletedIds, selectDirtyIds } from 'slices/userItemSlice';
+import DragDisplay from 'components/DragDisplay';
+import Header from 'components/Header';
 
 const App = () => {
   const dispatch = useAppDispatch();
@@ -42,10 +41,7 @@ const App = () => {
 
   return (
     <div className="rootContainer">
-      {auth !== null
-        ? <Profile auth={auth} />
-        : <LoginForm />
-      }
+      <Header auth={auth} />
       <DragDisplay />
       <Outlet />
     </div>

@@ -1,12 +1,12 @@
 import React, { ChangeEvent } from 'react';
 import { useDrop } from 'react-dnd';
-import { ItemTypes } from '../constants';
-import { useAppDispatch, useAppSelector } from '../hooks';
-import { selectCategoryById, setCategory } from '../slices/categorySlice';
 import { v4 as uuidv4 } from 'uuid';
-import { CategoryItem as CategoryItemType, UserItem, UUID } from '../types';
-import CategoryItem from './CategoryItem';
-import { setUserItem } from '../slices/userItemSlice';
+import { ItemTypes } from 'globalConstants';
+import { useAppDispatch, useAppSelector } from 'hooks/reduxHooks';
+import { selectCategoryById, setCategory } from 'slices/categorySlice';
+import { CategoryItem as CategoryItemType, UserItem, UUID } from 'types';
+import { setUserItem } from 'slices/userItemSlice';
+import CategoryItem from 'components/CategoryItem';
 
 interface DragUserItem {
   type: string

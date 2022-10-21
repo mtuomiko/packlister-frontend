@@ -1,10 +1,10 @@
 import React, { ChangeEvent } from 'react';
 import { useDrag } from 'react-dnd';
-import { ItemTypes } from '../constants';
-import { useAppDispatch, useAppSelector } from '../hooks';
-import { removeUserItem, selectUserItemById, setUserItem } from '../slices/userItemSlice';
-import { UserItem as UserItemType, UUID } from '../types';
-import { parseEventToValue } from '../utils/inputUtils';
+import { ItemTypes } from 'globalConstants';
+import { useAppDispatch, useAppSelector } from 'hooks/reduxHooks';
+import { removeUserItem, selectUserItemById, setUserItem } from 'slices/userItemSlice';
+import { UserItem as UserItemType, UUID } from 'types';
+import { parseEventToValue } from 'utils/inputUtils';
 
 const UserItem = ({ userItemId }: { userItemId: UUID }) => {
   const userItem = useAppSelector(state => selectUserItemById(state, userItemId));

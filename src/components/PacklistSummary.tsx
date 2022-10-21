@@ -1,9 +1,9 @@
 import React from 'react';
 import { Cell, Legend, Pie, PieChart, ResponsiveContainer } from 'recharts';
-import { useAppSelector } from '../hooks';
-import { selectCategoryArrayByIds } from '../slices/categorySlice';
-import { selectUserItems } from '../slices/userItemSlice';
-import { Category, UserItem, UUID } from '../types';
+import { useAppSelector } from 'hooks/reduxHooks';
+import { selectCategoryArrayByIds } from 'slices/categorySlice';
+import { selectUserItems } from 'slices/userItemSlice';
+import { Category, UserItem, UUID } from 'types';
 
 interface SummaryEntry {
   name?: string
@@ -39,13 +39,14 @@ const createSummaryEntries = (
     );
     return { name: category.name, weight: totalWeight };
   });
-  const categoryWeightsWithColors = categoryWeights.map((entry, index) => {
+  const categoriesNonZeroWeight = categoryWeights.filter(entry => entry.weight !== 0);
+  const categoryWeightsWithColors = categoriesNonZeroWeight.map((entry, index) => {
     return { ...entry, color: COLORS[index % COLORS.length] };
   });
   return categoryWeightsWithColors;
 };
 
-const CategorySummary = ({ categoryIds }: { categoryIds: UUID[] }) => {
+const PacklistSummary = ({ categoryIds }: { categoryIds: UUID[] }) => {
   const categories = useAppSelector(state => selectCategoryArrayByIds(state, categoryIds));
   const userItems = useAppSelector(selectUserItems);
 
@@ -100,4 +101,4 @@ const CategorySummary = ({ categoryIds }: { categoryIds: UUID[] }) => {
   );
 };
 
-export default CategorySummary;
+export default PacklistSummary;

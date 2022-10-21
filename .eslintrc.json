@@ -5,7 +5,9 @@
     },
     "extends": [
         "plugin:react/recommended",
-        "standard-with-typescript"
+        "standard-with-typescript",
+        "plugin:import/recommended",
+        "plugin:import/typescript"
     ],
     "overrides": [],
     "parserOptions": {
@@ -19,6 +21,16 @@
     "settings": {
         "react": {
             "version": "detect"
+        },
+        "import/parsers": {
+            "@typescript-eslint/parser": [
+                ".ts",
+                ".tsx"
+            ]
+        },
+        "import/resolver": {
+            "typescript": true,
+            "node": true
         }
     },
     "rules": {
@@ -42,6 +54,21 @@
             {
                 "ignoredNodes": [
                     "TSTypeParameterInstantiation"
+                ]
+            }
+        ],
+        "import/order": [
+            "error",
+            {
+                "groups": [
+                    "builtin",
+                    "external",
+                    "internal",
+                    "parent",
+                    "sibling",
+                    "index",
+                    "object",
+                    "type"
                 ]
             }
         ]

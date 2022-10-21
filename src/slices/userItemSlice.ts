@@ -1,8 +1,8 @@
 import { createAsyncThunk, createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { RootState } from '../store';
-import { UserItem, UserItemsResponse, UUID } from '../types';
-import userItemsService from '../services/userItem';
 import pickBy from 'lodash/pickBy';
+import { RootState, ThunkApi } from '../store';
+import { Status, UserItem, UserItemsResponse, UUID } from '../types';
+import userItemsService from '../services/userItem';
 
 export interface UserItemsState {
   userItems: {
@@ -11,21 +11,40 @@ export interface UserItemsState {
   }
   dirtyIds: UUID[] // modified and not yet sent to server
   deletedIds: UUID[] // deleted but not deleted on server
+  status: Status
 }
 
-const initialState: UserItemsState = {
+export const initialUserItemState: UserItemsState = {
   userItems: {
     byId: {},
     allIds: []
   },
   dirtyIds: [],
-  deletedIds: []
+  deletedIds: [],
+  status: Status.Idle
 };
 
-export const getAllUserItems = createAsyncThunk('items/getAll', async () => {
-  const response = await userItemsService.getAll();
-  return response;
-});
+const userItemSliceName = 'items';
+
+export const getAllUserItems = createAsyncThunk<
+  // createAsyncThunk needs an void argument if no actual arguments used
+  // eslint-disable-next-line @typescript-eslint/no-invalid-void-type
+  UserItemsResponse, void, ThunkApi
+>(
+  `${userItemSliceName}/getAll`,
+  async (_) => {
+    const response = await userItemsService.getAll();
+    return response;
+  },
+  {
+    condition: (_, { getState }) => {
+      const status = getState().items.status;
+      if (status === Status.Succeeded || status === Status.Loading) {
+        return false;
+      }
+    }
+  }
+);
 
 /**
  * Gets a list of dirty user item ids that need to be upserted to backend. Not expecting the actual user items due to
@@ -33,27 +52,31 @@ export const getAllUserItems = createAsyncThunk('items/getAll', async () => {
  * state to then get the actual user item data.
  */
 export const batchUpsert = createAsyncThunk<
-  UserItemsResponse,
-  UUID[],
-  { state: RootState }
->('items/batchUpsert', async (userItemIds: UUID[], { getState }) => {
-  const userItems = selectUserItems(getState());
-  const itemsToUpsert = Object.values(
-    pickBy(userItems, (_value, key) => userItemIds.includes(key))
-  );
-  const response = await userItemsService.batchUpsert(itemsToUpsert);
-  return response;
-});
+  UserItemsResponse, UUID[], ThunkApi
+>(
+  `${userItemSliceName}/batchUpsert`,
+  async (userItemIds: UUID[], { getState }) => {
+    const userItems = selectUserItems(getState());
+    const itemsToUpsert = Object.values(
+      pickBy(userItems, (_value, key) => userItemIds.includes(key))
+    );
+    const response = await userItemsService.batchUpsert(itemsToUpsert);
+    return response;
+  }
+);
 
-export const batchDelete = createAsyncThunk('items/batchDelete', async (userItemIds: UUID[]) => {
-  await userItemsService.batchDelete(userItemIds);
-  // return deleted ids for handling in action
-  return userItemIds;
-});
+export const batchDelete = createAsyncThunk(
+  `${userItemSliceName}/batchDelete`,
+  async (userItemIds: UUID[]) => {
+    await userItemsService.batchDelete(userItemIds);
+    // return deleted ids for handling in action
+    return userItemIds;
+  }
+);
 
 export const userItemSlice = createSlice({
-  name: 'items',
-  initialState,
+  name: userItemSliceName,
+  initialState: initialUserItemState,
   reducers: {
     setUserItem: (state, action: PayloadAction<UserItem>) => {
       const id = action.payload.id;
@@ -82,19 +105,24 @@ export const userItemSlice = createSlice({
   },
   extraReducers: builder => {
     builder
+      .addCase(getAllUserItems.pending, (state, _action) => {
+        state.status = Status.Loading;
+      })
       .addCase(getAllUserItems.fulfilled, (state, action) => {
+        // possible items coming from "offline use" use should be retained
         const allItems = action.payload.userItems.reduce(
           (memo, item) => ({ ...memo, [item.id]: item }),
           state.userItems.byId
         );
         const allIds = Object.keys(allItems);
-        // possible items coming from "offline use" use should be retained
         state.userItems.byId = allItems;
         state.userItems.allIds = allIds;
+        state.status = Status.Succeeded;
       })
-      .addCase(getAllUserItems.rejected, (_state, action) => {
+      .addCase(getAllUserItems.rejected, (state, action) => {
         console.error(action.error);
         console.error(action.payload);
+        state.status = Status.Failed;
       })
       .addCase(batchUpsert.fulfilled, (state, action) => {
         const upsertedIds = action.payload.userItems.map(item => item.id);

@@ -1,9 +1,9 @@
 import React from 'react';
-import { useAppDispatch, useAppSelector } from '../hooks';
-import { setUserItem, selectUserItemIds } from '../slices/userItemSlice';
-import { UserItem as UserItemType } from '../types';
 import { v4 as uuidv4 } from 'uuid';
-import UserItem from './UserItem';
+import { useAppDispatch, useAppSelector } from 'hooks/reduxHooks';
+import { setUserItem, selectUserItemIds } from 'slices/userItemSlice';
+import { UserItem as UserItemType } from 'types';
+import UserItem from 'components/UserItem';
 
 const UserItemList = () => {
   const itemIds = useAppSelector(selectUserItemIds);

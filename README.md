@@ -1,6 +1,7 @@
 # Packlister frontend
 
-And so on...
+Frontend repository for a hobby project aiming to replicate [LighterPack](https://lighterpack.com/). Backend repository
+is at [packlister-backend](https://github.com/mtuomiko/packlister-backend).
 
 ### NPM commands
 
@@ -11,9 +12,11 @@ And so on...
 
 ### Environment variables
 
-You can create `.env` (see `.env.example`) to set these in development.
+You can create a `.env` file (see `.env.example`) to set these in development.
 
 * `DEV_PORT` Configure webpack devserver port. Defaults to `3003`.
-* `API_BASE_URL` API URL, defaults to `http://localhost:8080/api` in dev. This needs to be defined for a production build.
+* `API_BASE_URL` API URL, defaults to `http://localhost:8080/api` in dev and to a relative path `/api` for production. 
 
 ### Development
+
+Example for running production build locally: `npx serve -s build -p 3003`

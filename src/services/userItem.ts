@@ -1,5 +1,5 @@
-import axios from './axiosConfig';
 import { UserItem, UserItemsResponse } from '../types';
+import axios from './axiosAuthConfig';
 
 const itemEndpoint = '/items';
 

@@ -1,5 +1,5 @@
 import { PacklistDto, PacklistsResponse, UUID } from '../types';
-import axios from './axiosConfig';
+import axios from './axiosAuthConfig';
 
 const packlistEndpoint = '/packlists';
 

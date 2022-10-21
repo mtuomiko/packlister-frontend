@@ -1,23 +1,27 @@
 import React from 'react';
-import ReactDOM from 'react-dom/client';
+import { createRoot } from 'react-dom/client';
 import { Provider } from 'react-redux';
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
-import App from './App';
-import { injectStore } from './services/axiosConfig';
-import { store } from './store';
+import { ChakraProvider } from '@chakra-ui/react';
+import { injectStore } from 'services/axiosAuthConfig';
+import App from 'App';
+import { store } from 'store';
+import LoginForm from 'components/LoginForm';
 
 injectStore(store);
 
-const root = ReactDOM.createRoot(document.getElementById('root') as HTMLElement);
+const root = createRoot(document.getElementById('root') as HTMLElement);
 root.render(
   <React.StrictMode>
     <Provider store={store}>
-      <BrowserRouter>
-        <Routes>
-          <Route path="/*" element={<App />}>
-          </Route>
-        </Routes>
-      </BrowserRouter>
+      <ChakraProvider>
+        <BrowserRouter>
+          <Routes>
+            <Route path="/login" element={<LoginForm />} />
+            <Route path="/*" element={<App />} />
+          </Routes>
+        </BrowserRouter>
+      </ChakraProvider>
     </Provider>
   </React.StrictMode>
 );

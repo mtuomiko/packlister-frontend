@@ -49,7 +49,7 @@ export interface RegistrationInfo {
   password: string
 };
 
-export interface UserResponse {
+export interface User {
   id: string
   username: string
   email: string
@@ -58,9 +58,8 @@ export interface UserResponse {
 export type Credentials = Omit<RegistrationInfo, 'email'>;
 
 export interface TokenResponse {
-  token: string
-  username: string
-  email: string
+  accessToken: string
+  user: User
 };
 
 export interface UserItemsResponse {
@@ -70,3 +69,10 @@ export interface UserItemsResponse {
 export interface PacklistsResponse {
   packlists: PacklistBase[]
 };
+
+export const enum Status {
+  Idle = 'IDLE',
+  Loading = 'LOADING',
+  Succeeded = 'SUCCEEDED',
+  Failed = 'FAILED'
+}
