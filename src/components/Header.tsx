@@ -1,41 +1,41 @@
 import React from 'react';
-import { Box, Button, Flex, Stack } from '@chakra-ui/react';
+import { Box, Button, Flex, HStack, IconButton, useColorModeValue } from '@chakra-ui/react';
 import { Link } from 'react-router-dom';
-import { AuthState, logout } from 'slices/authSlice';
-import { useAppDispatch } from 'hooks/reduxHooks';
+import { CloseIcon, HamburgerIcon } from '@chakra-ui/icons';
+import { logout, selectAuth } from 'slices/authSlice';
+import { useAppDispatch, useAppSelector } from 'hooks/reduxHooks';
 
-const Header = ({ auth }: { auth: AuthState }) => {
+const Header = ({ isSidebarOpen, onToggleSidebar }: { isSidebarOpen: boolean, onToggleSidebar: () => void }) => {
+  const auth = useAppSelector(selectAuth);
   const dispatch = useAppDispatch();
 
   const handleLogout = () => {
     void dispatch(logout());
   };
 
-  const loggedIn = () => {
-    return (
-      <>
-        <Button onClick={handleLogout}>Logout</Button>
-      </>
-    );
-  };
+  const loggedIn = () => <>
+    <Button size='sm' colorScheme='teal' onClick={handleLogout}>Logout</Button>
+  </>;
 
-  const notLoggedIn = () => {
-    return (
-      <>
-        <Link to="/login"><Button>Login</Button></Link>
-        <Button>Signup</Button>
-      </>
-    );
-  };
+  const notLoggedIn = () => <>
+    <Link to="/login"><Button size='sm' colorScheme='teal'>Login</Button></Link>
+    <Button size='sm' colorScheme='teal'>Signup</Button>
+  </>;
 
   return (
-    <Flex>
-      <Box>
-        <Stack>
+    <Box bg={useColorModeValue('gray.50', 'gray.900')} p={2}>
+      <Flex align={'center'} justify={'space-between'}>
+        <IconButton
+          size={'md'}
+          icon={isSidebarOpen ? <CloseIcon /> : <HamburgerIcon />}
+          aria-label={'Open sidebar'}
+          onClick={onToggleSidebar}
+        />
+        <HStack spacing={4}>
           {auth !== null ? loggedIn() : notLoggedIn()}
-        </Stack>
-      </Box>
-    </Flex>
+        </HStack>
+      </Flex>
+    </Box>
   );
 };
 

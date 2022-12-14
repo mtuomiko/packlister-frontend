@@ -1,5 +1,7 @@
 import React, { ChangeEvent } from 'react';
 import { useDrag } from 'react-dnd';
+import { Checkbox, IconButton, Input } from '@chakra-ui/react';
+import { DeleteIcon } from '@chakra-ui/icons';
 import { ItemTypes } from 'globalConstants';
 import { useAppDispatch, useAppSelector } from 'hooks/reduxHooks';
 import { removeUserItem, selectUserItemById, setUserItem } from 'slices/userItemSlice';
@@ -29,31 +31,41 @@ const UserItem = ({ userItemId }: { userItemId: UUID }) => {
   const { id, name, description, weight, publicVisibility } = userItem;
   return (
     <div ref={drag} style={{ opacity: isDragging ? 0.5 : 1 }}>
-      <input
+      <Input
         name="name"
         type="text"
+        placeholder='Name'
         value={name ?? ''}
+        size='sm'
         onChange={(e) => modifyItem(e, userItem)}
       />
-      <input
+      <Input
         name="description"
         type="text"
+        placeholder='Description'
         value={description ?? ''}
+        size='sm'
         onChange={(e) => modifyItem(e, userItem)}
       />
-      <input
+      <Input
         name="weight"
         type="number"
         value={weight ?? ''}
+        size='sm'
         onChange={(e) => modifyItem(e, userItem)}
-      />
-      <input
+      /> g
+      <Checkbox
         name="publicVisibility"
         type="checkbox"
         checked={publicVisibility}
         onChange={(e) => modifyItem(e, userItem)}
       />
-      <button onClick={() => dispatch(removeUserItem(id))}>X</button>
+      <IconButton
+        onClick={() => dispatch(removeUserItem(id))}
+        icon={<DeleteIcon />}
+        aria-label={'delete user item'}
+        size='xs'
+      />
     </div>
   );
 };

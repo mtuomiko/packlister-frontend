@@ -25,6 +25,7 @@ const isRejectedLogout = isRejected(logout);
 const isFulfilledLogout = isFulfilled(logout);
 
 const rootReducer = (state: RootState, action: AnyAction) => {
+  // after logout action (regardless of success), reset state
   if (isFulfilledLogout(action) || isRejectedLogout(action) || action.type === 'auth/clear') {
     state = {
       auth: initialAuthState,

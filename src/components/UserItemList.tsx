@@ -1,5 +1,6 @@
 import React from 'react';
 import { v4 as uuidv4 } from 'uuid';
+import { Box, Heading, VStack } from '@chakra-ui/react';
 import { useAppDispatch, useAppSelector } from 'hooks/reduxHooks';
 import { setUserItem, selectUserItemIds } from 'slices/userItemSlice';
 import { UserItem as UserItemType } from 'types';
@@ -19,15 +20,17 @@ const UserItemList = () => {
   };
 
   return (
-    <div>
-      <h3>Items</h3>
-      {itemIds.map(id =>
-        <UserItem key={id} userItemId={id} />
-      )}
+    <Box p={1}>
+      <Heading as='h3' size='sm'>Items</Heading>
+      <VStack>
+        {itemIds.map(id =>
+          <UserItem key={id} userItemId={id} />
+        )}
+      </VStack>
       <div>
         <button onClick={() => addNew()}>Add new item</button>
       </div>
-    </div>
+    </Box>
   );
 };
 

@@ -1,6 +1,7 @@
 import React, { ChangeEvent, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { v4 as uuidv4 } from 'uuid';
+import { Input } from '@chakra-ui/react';
 import { useAppDispatch, useAppSelector } from 'hooks/reduxHooks';
 import { setPacklist, addCategoryToPacklist, selectPacklistById, getPacklistComplete, updatePacklist } from 'slices/packlistSlice';
 import { Category as CategoryType, Packlist as PacklistType } from 'types';
@@ -62,16 +63,18 @@ const Packlist = () => {
     <div>
       <div>
         <label>Name</label>
-        <input
+        <Input
           name="name"
           type="text"
           value={packlist.name ?? ''}
           onChange={(e) => modifyByValue(e)}
+          size="lg"
+          placeholder='My packlist'
         />
       </div>
       <div>
         <label>Description</label>
-        <input
+        <Input
           name="description"
           type="text"
           value={packlist.description ?? ''}

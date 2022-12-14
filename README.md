@@ -1,7 +1,27 @@
 # Packlister frontend
 
-Frontend repository for a hobby project aiming to replicate [LighterPack](https://lighterpack.com/). Backend repository
-is at [packlister-backend](https://github.com/mtuomiko/packlister-backend).
+This is the frontend repository for Packlister, a hobby project aiming to provide a similar service
+as [LighterPack](https://lighterpack.com/). See 
+also [backend repository](https://github.com/mtuomiko/packlister-backend)
+
+Note! Application backend is deployed on a [render.com](https://render.com/) free plan which has very conservative 
+resource limits and also suspends inactive services. Starting a new instance of the backend can take up to 
+**5 minutes!** Most of non-logged in frontend functionality will still work until the backend instance is available.
+
+Application is deployed at https://packlister.onrender.com with the backend deployed to 
+`packlister-svc.onrender.com`.
+
+### Used technologies
+
+* Main library: React
+* Language: TypeScript
+* Tooling: Nothing, manual setup just for practice. For a real world project, something like CRA or Vite would probably 
+make more sense.
+* Build: Webpack with ts-loader
+* State management: Redux
+* Code quality / static analysis: ESLint
+* Component library / styling: Chakra UI, using Emotion
+* Visualization: Recharts
 
 ### NPM commands
 
@@ -19,4 +39,4 @@ You can create a `.env` file (see `.env.example`) to set these in development.
 
 ### Development
 
-Example for running production build locally: `npx serve -s build -p 3003`
+Example for running production build locally: `npx serve -s ./build -p 3003` (remember to build first)

@@ -3,8 +3,7 @@ import { Outlet } from 'react-router-dom';
 import { useAppDispatch, useAppSelector } from 'hooks/reduxHooks';
 import { selectAuth } from 'slices/authSlice';
 import { batchDelete, batchUpsert, getAllUserItems, selectDeletedIds, selectDirtyIds } from 'slices/userItemSlice';
-import DragDisplay from 'components/DragDisplay';
-import Header from 'components/Header';
+import MainDisplay from 'components/MainDisplay';
 
 const App = () => {
   const dispatch = useAppDispatch();
@@ -41,8 +40,7 @@ const App = () => {
 
   return (
     <div className="rootContainer">
-      <Header auth={auth} />
-      <DragDisplay />
+      <MainDisplay />
       <Outlet />
     </div>
   );

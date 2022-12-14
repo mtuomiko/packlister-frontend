@@ -1,6 +1,7 @@
 import React, { ChangeEvent } from 'react';
 import { useDrop } from 'react-dnd';
 import { v4 as uuidv4 } from 'uuid';
+import { Input } from '@chakra-ui/react';
 import { ItemTypes } from 'globalConstants';
 import { useAppDispatch, useAppSelector } from 'hooks/reduxHooks';
 import { selectCategoryById, setCategory } from 'slices/categorySlice';
@@ -67,12 +68,13 @@ const Category = ({ categoryId }: { categoryId: UUID }) => {
 
   return (
     <div ref={drop} style={{ position: 'relative' }}>
-      <input
+      <Input
         name="name"
         type="text"
         value={category.name ?? ''}
         placeholder="Category"
         onChange={modifyByValue}
+        size="sm"
       />
       {category.items.map(categoryItem => (
         <CategoryItem key={categoryItem.userItemId} categoryItem={categoryItem} modifyCategoryItem={modifyCategoryItem} />

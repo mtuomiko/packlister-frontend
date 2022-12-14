@@ -56,7 +56,7 @@ instance.interceptors.request.use(async (config) => {
         token = refreshResponse.accessToken;
         store.dispatch(setAuth(refreshResponse));
       } catch (error) {
-        // if refresh fails, logout user
+        // If refresh fails, clear auth. In practice, reset will reset global state
         store.dispatch(clear());
         throw error;
       } finally {

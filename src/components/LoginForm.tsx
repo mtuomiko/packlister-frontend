@@ -43,7 +43,7 @@ const LoginForm = () => {
             <FormLabel>Password</FormLabel>
             <Input placeholder="Password" name="password" {...password.inputVars} />
           </FormControl>
-          <Button type="submit" width="full">
+          <Button colorScheme={'teal'} type="submit" width="full">
             Login
           </Button>
         </Stack>
